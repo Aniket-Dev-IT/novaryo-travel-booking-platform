@@ -1,0 +1,204 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard - {{ user.get_full_name }} - Novaryo{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <!-- Dashboard Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h1 class="h2">Welcome back, {{ user.first_name }}!</h1>
+                    <p class="text-muted">Manage your bookings, preferences, and saved hotels</p>
+                </div>
+                <div class="text-end">
+                    <small class="text-muted">Member since {{ user.created_at|date:"M Y" }}</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Dashboard Stats -->
+    <div class="row mb-5">
+        <div class="col-md-3">
+            <div class="card bg-primary text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h5 class="card-title">Saved Hotels</h5>
+                            <h2 class="mb-0">{{ saved_hotels_count }}</h2>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="bi bi-heart-fill fs-1"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-success text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h5 class="card-title">Saved Searches</h5>
+                            <h2 class="mb-0">{{ saved_searches_count }}</h2>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="bi bi-search fs-1"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-info text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h5 class="card-title">Profile Complete</h5>
+                            <h2 class="mb-0">{{ profile_completion|floatformat:0 }}%</h2>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="bi bi-person-check fs-1"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-warning text-dark">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h5 class="card-title">Total Bookings</h5>
+                            <h2 class="mb-0">0</h2>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="bi bi-calendar-check fs-1"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Recent Saved Hotels -->
+        <div class="col-lg-6">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="card-title mb-0">Recently Saved Hotels</h5>
+                    <a href="{% url 'users:saved_hotels' %}" class="btn btn-sm btn-outline-primary">View All</a>
+                </div>
+                <div class="card-body">
+                    {% if recent_saved_hotels %}
+                        {% for saved_hotel in recent_saved_hotels %}
+                        <div class="d-flex mb-3 pb-3 {% if not forloop.last %}border-bottom{% endif %}">
+                            <div class="hotel-thumb bg-light d-flex align-items-center justify-content-center me-3" style="width: 60px; height: 60px;">
+                                <i class="bi bi-building text-muted"></i>
+                            </div>
+                            <div class="flex-grow-1">
+                                <h6 class="mb-1">
+                                    <a href="{% url 'hotels:hotel_detail' saved_hotel.hotel.slug %}" 
+                                       class="text-decoration-none text-dark">
+                                        {{ saved_hotel.hotel.name|truncatechars:25 }}
+                                    </a>
+                                </h6>
+                                <p class="text-muted small mb-1">
+                                    {{ saved_hotel.hotel.city.name }}, {{ saved_hotel.hotel.city.country.name }}
+                                </p>
+                                <small class="text-muted">Saved {{ saved_hotel.saved_at|timesince }} ago</small>
+                            </div>
+                            <div class="text-end">
+                                <div class="fw-bold text-primary">${{ saved_hotel.hotel.price_from }}/night</div>
+                                <div class="text-warning">
+                                    {% for star in saved_hotel.hotel.star_range %}
+                                        <i class="bi bi-star-fill"></i>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="text-center py-4">
+                            <i class="bi bi-heart fs-1 text-muted mb-3"></i>
+                            <p class="text-muted">No saved hotels yet</p>
+                            <a href="{% url 'hotels:home' %}" class="btn btn-primary">
+                                Start Exploring
+                            </a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Actions and Recent Activity -->
+        <div class="col-lg-6">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Quick Actions</h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-2">
+                        <a href="{% url 'hotels:home' %}" class="btn btn-outline-primary">
+                            <i class="bi bi-search me-2"></i> Search Hotels
+                        </a>
+                        <a href="{% url 'users:profile' %}" class="btn btn-outline-primary">
+                            <i class="bi bi-person me-2"></i> Update Profile
+                        </a>
+                        <a href="{% url 'users:preferences' %}" class="btn btn-outline-primary">
+                            <i class="bi bi-gear me-2"></i> Preferences
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Login Activity -->
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Recent Login Activity</h5>
+                </div>
+                <div class="card-body">
+                    {% if recent_login_logs %}
+                        {% for login_log in recent_login_logs %}
+                        <div class="d-flex justify-content-between align-items-center mb-2 {% if not forloop.last %}border-bottom pb-2{% endif %}">
+                            <div>
+                                <i class="bi bi-check-circle-fill text-success me-2"></i>
+                                <strong>Successful login</strong>
+                            </div>
+                            <small class="text-muted">{{ login_log.timestamp|timesince }} ago</small>
+                        </div>
+                        {% endfor %}
+                        <div class="text-center mt-3">
+                            <a href="{% url 'users:security' %}" class="btn btn-sm btn-outline-secondary">
+                                View Security Settings
+                            </a>
+                        </div>
+                    {% else %}
+                        <p class="text-muted">No recent activity</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Profile Completion Reminder -->
+    {% if profile_completion < 80 %}
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="alert alert-info">
+                <div class="d-flex align-items-center">
+                    <i class="bi bi-info-circle me-3 fs-4"></i>
+                    <div class="flex-grow-1">
+                        <strong>Complete your profile ({{ profile_completion|floatformat:0 }}%)</strong><br>
+                        Complete your profile to get personalized recommendations and better booking experience.
+                    </div>
+                    <a href="{% url 'users:profile' %}" class="btn btn-primary">Complete Now</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

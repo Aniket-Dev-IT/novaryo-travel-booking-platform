@@ -1,0 +1,395 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ reward.name }} - Rewards - {{ block.super }}{% endblock %}
+
+{% block extra_css %}
+<style>
+.reward-hero {
+    height: 400px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 15px;
+    color: white;
+    font-size: 4rem;
+    margin-bottom: 2rem;
+}
+
+.reward-hero img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 15px;
+}
+
+.points-display {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 1.5rem;
+    border-radius: 15px;
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.points-value {
+    font-size: 3rem;
+    font-weight: bold;
+    margin-bottom: 0.5rem;
+}
+
+.redemption-form {
+    background: #f8f9fa;
+    border-radius: 15px;
+    padding: 2rem;
+    border: 2px solid #e9ecef;
+}
+
+.redemption-issues {
+    background: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+    border-radius: 10px;
+    padding: 1rem;
+    margin-bottom: 2rem;
+}
+
+.tier-requirement {
+    background: #e3f2fd;
+    color: #1976d2;
+    padding: 0.5rem 1rem;
+    border-radius: 25px;
+    font-size: 0.875rem;
+    display: inline-block;
+    margin-bottom: 1rem;
+}
+
+.stock-info {
+    background: #e8f5e8;
+    color: #2e7d32;
+    padding: 0.5rem 1rem;
+    border-radius: 10px;
+    display: inline-block;
+    margin-bottom: 1rem;
+}
+
+.validity-info {
+    background: #fff3cd;
+    color: #856404;
+    padding: 0.5rem 1rem;
+    border-radius: 10px;
+    display: inline-block;
+    margin-bottom: 1rem;
+}
+
+.breadcrumb-custom {
+    background: transparent;
+    padding: 0;
+    margin-bottom: 2rem;
+}
+
+.breadcrumb-custom .breadcrumb-item + .breadcrumb-item::before {
+    content: ">";
+    color: #6c757d;
+}
+
+.reward-features {
+    list-style: none;
+    padding: 0;
+}
+
+.reward-features li {
+    padding: 0.5rem 0;
+    border-bottom: 1px solid #e9ecef;
+}
+
+.reward-features li:last-child {
+    border-bottom: none;
+}
+
+.feature-icon {
+    color: #28a745;
+    margin-right: 0.5rem;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <!-- Breadcrumb -->
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb breadcrumb-custom">
+            <li class="breadcrumb-item"><a href="{% url 'loyalty:dashboard' %}">Loyalty</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'loyalty:rewards_catalog' %}">Rewards</a></li>
+            <li class="breadcrumb-item active" aria-current="page">{{ reward.name }}</li>
+        </ol>
+    </nav>
+
+    <div class="row">
+        <!-- Reward Image and Info -->
+        <div class="col-lg-8">
+            <!-- Reward Hero -->
+            <div class="reward-hero">
+                {% if reward.image %}
+                    <img src="{{ reward.image.url }}" alt="{{ reward.name }}">
+                {% else %}
+                    <i class="fas fa-gift"></i>
+                {% endif %}
+            </div>
+
+            <!-- Reward Details -->
+            <div class="card">
+                <div class="card-body">
+                    <h1 class="h2 mb-3">{{ reward.name }}</h1>
+                    
+                    <!-- Category and Status -->
+                    <div class="mb-3">
+                        <span class="badge bg-primary me-2">{{ reward.get_category_display }}</span>
+                        {% if reward.featured %}
+                            <span class="badge bg-warning">Featured</span>
+                        {% endif %}
+                    </div>
+
+                    <!-- Requirements -->
+                    {% if reward.minimum_tier %}
+                        <div class="tier-requirement">
+                            <i class="fas fa-crown me-2"></i>
+                            Requires {{ reward.minimum_tier.name }}+ Tier
+                        </div>
+                    {% endif %}
+
+                    <!-- Stock Information -->
+                    {% if reward.stock_quantity %}
+                        <div class="stock-info">
+                            <i class="fas fa-box me-2"></i>
+                            {% with redeemed=reward.redemptions.count %}
+                                {{ reward.stock_quantity|add:"-"|add:redeemed }} remaining
+                            {% endwith %}
+                        </div>
+                    {% endif %}
+
+                    <!-- Validity Information -->
+                    {% if reward.valid_until %}
+                        <div class="validity-info">
+                            <i class="fas fa-clock me-2"></i>
+                            Valid until {{ reward.valid_until|date:"M d, Y" }}
+                        </div>
+                    {% endif %}
+
+                    <!-- Description -->
+                    <div class="mt-4">
+                        <h5>Description</h5>
+                        <p class="text-muted">{{ reward.description|linebreaks }}</p>
+                    </div>
+
+                    <!-- Features/Benefits (if applicable) -->
+                    {% if reward.category == 'flight' %}
+                        <div class="mt-4">
+                            <h5>What's Included</h5>
+                            <ul class="reward-features">
+                                <li><i class="fas fa-check feature-icon"></i>Flight booking credit</li>
+                                <li><i class="fas fa-check feature-icon"></i>Valid on all routes</li>
+                                <li><i class="fas fa-check feature-icon"></i>1 year validity</li>
+                                <li><i class="fas fa-check feature-icon"></i>Transferable to family members</li>
+                            </ul>
+                        </div>
+                    {% elif reward.category == 'upgrade' %}
+                        <div class="mt-4">
+                            <h5>Upgrade Benefits</h5>
+                            <ul class="reward-features">
+                                <li><i class="fas fa-check feature-icon"></i>Priority boarding</li>
+                                <li><i class="fas fa-check feature-icon"></i>Extra legroom</li>
+                                <li><i class="fas fa-check feature-icon"></i>Complimentary meal</li>
+                                <li><i class="fas fa-check feature-icon"></i>Additional baggage allowance</li>
+                            </ul>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Sidebar -->
+        <div class="col-lg-4">
+            <!-- Points Required -->
+            <div class="points-display">
+                <div class="points-value">{{ reward.points_required|floatformat:0 }}</div>
+                <div>Points Required</div>
+                {% if reward.cash_equivalent %}
+                    <small class="opacity-75">Equivalent to ${{ reward.cash_equivalent }}</small>
+                {% endif %}
+            </div>
+
+            <!-- Member Status -->
+            <div class="card mb-3">
+                <div class="card-body text-center">
+                    <h6>Your Points Balance</h6>
+                    <div class="h4 {% if membership.points_balance >= reward.points_required %}text-success{% else %}text-danger{% endif %}">
+                        {{ membership.points_balance|floatformat:0 }} Points
+                    </div>
+                    <small class="text-muted">
+                        {% if membership.points_balance >= reward.points_required %}
+                            You have enough points for this reward!
+                        {% else %}
+                            You need {{ reward.points_required|add:"-"|add:membership.points_balance|floatformat:0 }} more points
+                        {% endif %}
+                    </small>
+                </div>
+            </div>
+
+            <!-- Redemption Issues or Form -->
+            {% if not can_redeem %}
+                <div class="redemption-issues">
+                    <h6><i class="fas fa-exclamation-triangle me-2"></i>Cannot Redeem</h6>
+                    <ul class="mb-0">
+                        {% for issue in redemption_issues %}
+                            <li>{{ issue }}</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            {% else %}
+                <!-- Redemption Form -->
+                <div class="redemption-form">
+                    <h5 class="mb-3">Redeem This Reward</h5>
+                    
+                    <form method="post" id="redemption-form">
+                        {% csrf_token %}
+                        
+                        {% if form.booking_reference %}
+                            <div class="mb-3">
+                                <label for="{{ form.booking_reference.id_for_label }}" class="form-label">
+                                    {{ form.booking_reference.label }}
+                                </label>
+                                {{ form.booking_reference }}
+                                {% if form.booking_reference.help_text %}
+                                    <div class="form-text">{{ form.booking_reference.help_text }}</div>
+                                {% endif %}
+                                {% if form.booking_reference.errors %}
+                                    <div class="text-danger">
+                                        {% for error in form.booking_reference.errors %}
+                                            <small>{{ error }}</small>
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        {% endif %}
+
+                        {% if form.notes %}
+                            <div class="mb-3">
+                                <label for="{{ form.notes.id_for_label }}" class="form-label">
+                                    {{ form.notes.label }}
+                                </label>
+                                {{ form.notes }}
+                                {% if form.notes.help_text %}
+                                    <div class="form-text">{{ form.notes.help_text }}</div>
+                                {% endif %}
+                                {% if form.notes.errors %}
+                                    <div class="text-danger">
+                                        {% for error in form.notes.errors %}
+                                            <small>{{ error }}</small>
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        {% endif %}
+
+                        {% if form.terms_accepted %}
+                            <div class="mb-3">
+                                <div class="form-check">
+                                    {{ form.terms_accepted }}
+                                    <label for="{{ form.terms_accepted.id_for_label }}" class="form-check-label">
+                                        {{ form.terms_accepted.label }}
+                                    </label>
+                                </div>
+                                {% if form.terms_accepted.errors %}
+                                    <div class="text-danger">
+                                        {% for error in form.terms_accepted.errors %}
+                                            <small>{{ error }}</small>
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        {% endif %}
+
+                        <!-- Confirmation Summary -->
+                        <div class="bg-light p-3 rounded mb-3">
+                            <h6>Redemption Summary</h6>
+                            <div class="d-flex justify-content-between">
+                                <span>Reward:</span>
+                                <strong>{{ reward.name }}</strong>
+                            </div>
+                            <div class="d-flex justify-content-between">
+                                <span>Points to deduct:</span>
+                                <strong class="text-danger">-{{ reward.points_required|floatformat:0 }}</strong>
+                            </div>
+                            <hr class="my-2">
+                            <div class="d-flex justify-content-between">
+                                <span>Points after redemption:</span>
+                                <strong>{{ membership.points_balance|add:"-"|add:reward.points_required|floatformat:0 }}</strong>
+                            </div>
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary btn-lg" id="redeem-btn">
+                                <i class="fas fa-gift me-2"></i>Redeem Now
+                            </button>
+                            <a href="{% url 'loyalty:rewards_catalog' %}" class="btn btn-outline-secondary">
+                                <i class="fas fa-arrow-left me-2"></i>Back to Catalog
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            {% endif %}
+
+            <!-- Quick Actions -->
+            <div class="card mt-3">
+                <div class="card-body">
+                    <h6>Quick Actions</h6>
+                    <div class="d-grid gap-2">
+                        <a href="{% url 'loyalty:rewards_catalog' %}" class="btn btn-sm btn-outline-primary">
+                            <i class="fas fa-search me-2"></i>Browse More Rewards
+                        </a>
+                        <a href="{% url 'loyalty:points_history' %}" class="btn btn-sm btn-outline-info">
+                            <i class="fas fa-history me-2"></i>Points History
+                        </a>
+                        <a href="{% url 'loyalty:tier_benefits' %}" class="btn btn-sm btn-outline-success">
+                            <i class="fas fa-crown me-2"></i>Tier Benefits
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Form submission with loading state
+document.getElementById('redemption-form').addEventListener('submit', function() {
+    const submitBtn = document.getElementById('redeem-btn');
+    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Processing...';
+    submitBtn.disabled = true;
+});
+
+// Confirmation dialog before redemption
+document.getElementById('redeem-btn').addEventListener('click', function(e) {
+    const confirmed = confirm(
+        'Are you sure you want to redeem this reward for ' + 
+        '{{ reward.points_required|floatformat:0 }} points? This action cannot be undone.'
+    );
+    
+    if (!confirmed) {
+        e.preventDefault();
+    }
+});
+
+// Auto-uppercase booking reference
+const bookingRef = document.querySelector('input[name="booking_reference"]');
+if (bookingRef) {
+    bookingRef.addEventListener('input', function() {
+        this.value = this.value.toUpperCase();
+    });
+}
+</script>
+{% endblock %}

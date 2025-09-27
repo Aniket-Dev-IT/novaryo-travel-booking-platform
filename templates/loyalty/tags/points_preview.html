@@ -1,0 +1,62 @@
+{% if is_authenticated and points_info %}
+    <div class="loyalty-points-preview" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 1rem; border-radius: 10px; margin: 1rem 0;">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <h6 class="mb-1">You'll earn with this booking:</h6>
+                <div class="h4 mb-0">{{ points_info.total_points|floatformat:0 }} points</div>
+                {% if points_info.tier_name %}
+                    <small style="opacity: 0.9;">{{ points_info.tier_name }} member benefits applied</small>
+                {% endif %}
+            </div>
+            <div class="text-end">
+                <i class="fas fa-coins fa-2x" style="opacity: 0.7;"></i>
+                {% if points_info.promotion_name %}
+                    <div class="mt-1">
+                        <span class="badge" style="background: rgba(255,255,255,0.2);">
+                            {{ points_info.promotion_name }}
+                        </span>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+        
+        {% if points_info.tier_bonus > 0 or points_info.promotion_bonus > 0 %}
+            <div class="mt-2 pt-2" style="border-top: 1px solid rgba(255,255,255,0.2);">
+                <small class="d-block">
+                    Base: {{ points_info.base_points|floatformat:0 }}
+                    {% if points_info.tier_bonus > 0 %}+ {{ points_info.tier_bonus|floatformat:0 }} tier bonus{% endif %}
+                    {% if points_info.promotion_bonus > 0 %}+ {{ points_info.promotion_bonus|floatformat:0 }} promo bonus{% endif %}
+                </small>
+            </div>
+        {% endif %}
+    </div>
+{% elif is_authenticated %}
+    <div class="loyalty-points-preview" style="background: #f8f9fa; border: 1px solid #e9ecef; padding: 1rem; border-radius: 10px; margin: 1rem 0;">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <h6 class="mb-1">You'll earn with this booking:</h6>
+                <div class="h5 mb-0 text-primary">{{ amount|floatformat:0 }} points</div>
+                <small class="text-muted">Join our loyalty program for bonus points!</small>
+            </div>
+            <div>
+                <i class="fas fa-coins fa-2x text-muted"></i>
+            </div>
+        </div>
+    </div>
+{% else %}
+    <div class="loyalty-points-preview" style="background: #e3f2fd; border: 1px solid #bbdefb; padding: 1rem; border-radius: 10px; margin: 1rem 0;">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <h6 class="mb-1">Earn {{ amount|floatformat:0 }} points</h6>
+                <small class="text-muted">
+                    <a href="/users/login/" class="text-decoration-none">Sign in</a> or 
+                    <a href="/users/register/" class="text-decoration-none">join now</a> 
+                    to start earning points!
+                </small>
+            </div>
+            <div>
+                <i class="fas fa-coins fa-2x text-primary"></i>
+            </div>
+        </div>
+    </div>
+{% endif %}

@@ -1,0 +1,330 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Rewards Catalog - {{ block.super }}{% endblock %}
+
+{% block extra_css %}
+<style>
+.reward-card {
+    border: none;
+    border-radius: 12px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    height: 100%;
+}
+
+.reward-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+}
+
+.reward-image {
+    height: 200px;
+    object-fit: cover;
+    border-radius: 12px 12px 0 0;
+}
+
+.reward-placeholder {
+    height: 200px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 12px 12px 0 0;
+    color: white;
+    font-size: 3rem;
+}
+
+.points-required {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 25px;
+    font-weight: 600;
+    display: inline-block;
+}
+
+.category-badge {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    padding: 0.25rem 0.75rem;
+    border-radius: 15px;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+.filter-sidebar {
+    background: #f8f9fa;
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.reward-status {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    padding: 0.25rem 0.75rem;
+    border-radius: 15px;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+.can-redeem { background: #d4edda; color: #155724; }
+.cannot-redeem { background: #f8d7da; color: #721c24; }
+
+.tier-requirement {
+    background: #e3f2fd;
+    color: #1976d2;
+    padding: 0.25rem 0.5rem;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    display: inline-block;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <!-- Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h1 class="h2 mb-1">Rewards Catalog</h1>
+                    <p class="text-muted mb-0">Redeem your points for amazing rewards</p>
+                </div>
+                <div class="text-end">
+                    <div class="d-flex align-items-center">
+                        <small class="text-muted me-2">Available Points:</small>
+                        <span class="points-required">{{ membership.points_balance|floatformat:0 }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filters -->
+    <div class="filter-sidebar">
+        <form method="get" class="row g-3" id="filter-form">
+            <div class="col-md-3">
+                <label for="category" class="form-label">Category</label>
+                <select name="category" id="category" class="form-select">
+                    <option value="">All Categories</option>
+                    {% for value, label in categories %}
+                        <option value="{{ value }}" {% if value == current_category %}selected{% endif %}>
+                            {{ label }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+            
+            <div class="col-md-3">
+                <label for="max_points" class="form-label">Max Points</label>
+                <input type="number" name="max_points" id="max_points" 
+                       class="form-control" placeholder="Maximum points"
+                       value="{{ current_max_points|default:'' }}">
+            </div>
+            
+            <div class="col-md-3">
+                <div class="form-check mt-4">
+                    <input class="form-check-input" type="checkbox" name="available_only" 
+                           id="available_only" value="true" 
+                           {% if show_available_only %}checked{% endif %}>
+                    <label class="form-check-label" for="available_only">
+                        Show only rewards I can redeem
+                    </label>
+                </div>
+            </div>
+            
+            <div class="col-md-3">
+                <div class="d-grid mt-4">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-filter me-2"></i>Filter
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <!-- Results Info -->
+    <div class="row mb-3">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <small class="text-muted">
+                    Showing {{ page_obj.start_index }}-{{ page_obj.end_index }} of {{ page_obj.paginator.count }} rewards
+                </small>
+                {% if current_category or current_max_points or show_available_only %}
+                    <a href="{% url 'loyalty:rewards_catalog' %}" class="btn btn-sm btn-outline-secondary">
+                        <i class="fas fa-times me-2"></i>Clear Filters
+                    </a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Rewards Grid -->
+    <div class="row">
+        {% for reward in page_obj %}
+            <div class="col-lg-4 col-md-6 mb-4">
+                <div class="card reward-card position-relative">
+                    {% if reward.image %}
+                        <img src="{{ reward.image.url }}" class="reward-image" alt="{{ reward.name }}">
+                    {% else %}
+                        <div class="reward-placeholder">
+                            <i class="fas fa-gift"></i>
+                        </div>
+                    {% endif %}
+                    
+                    <!-- Category Badge -->
+                    <span class="category-badge bg-primary text-white">
+                        {{ reward.get_category_display }}
+                    </span>
+                    
+                    <!-- Availability Status -->
+                    {% if reward.can_redeem|default:True %}
+                        <span class="reward-status can-redeem">Available</span>
+                    {% else %}
+                        <span class="reward-status cannot-redeem">Unavailable</span>
+                    {% endif %}
+                    
+                    <div class="card-body">
+                        <h5 class="card-title">{{ reward.name }}</h5>
+                        <p class="card-text text-muted small">{{ reward.description|truncatewords:20 }}</p>
+                        
+                        <!-- Points Required -->
+                        <div class="mb-3">
+                            <span class="points-required">{{ reward.points_required|floatformat:0 }} Points</span>
+                            {% if reward.cash_equivalent %}
+                                <small class="text-muted ms-2">(≈${{ reward.cash_equivalent }})</small>
+                            {% endif %}
+                        </div>
+                        
+                        <!-- Requirements -->
+                        {% if reward.minimum_tier %}
+                            <div class="mb-3">
+                                <span class="tier-requirement">
+                                    Requires {{ reward.minimum_tier.name }}+ Tier
+                                </span>
+                            </div>
+                        {% endif %}
+                        
+                        <!-- Stock Info -->
+                        {% if reward.stock_quantity %}
+                            <small class="text-muted d-block mb-2">
+                                <i class="fas fa-box me-1"></i>
+                                {% with redeemed=reward.redemptions.count %}
+                                    {{ reward.stock_quantity|add:"-"|add:redeemed }} left
+                                {% endwith %}
+                            </small>
+                        {% endif %}
+                        
+                        <!-- Action Button -->
+                        <div class="d-grid">
+                            {% if membership.points_balance >= reward.points_required %}
+                                {% if reward.minimum_tier and membership.tier.order < reward.minimum_tier.order %}
+                                    <button class="btn btn-outline-secondary" disabled>
+                                        <i class="fas fa-lock me-2"></i>Tier Requirement Not Met
+                                    </button>
+                                {% elif not reward.is_in_stock %}
+                                    <button class="btn btn-outline-secondary" disabled>
+                                        <i class="fas fa-times me-2"></i>Out of Stock
+                                    </button>
+                                {% else %}
+                                    <a href="{% url 'loyalty:reward_detail' reward.slug %}" class="btn btn-primary">
+                                        <i class="fas fa-eye me-2"></i>View Details
+                                    </a>
+                                {% endif %}
+                            {% else %}
+                                <button class="btn btn-outline-secondary" disabled>
+                                    <i class="fas fa-coins me-2"></i>Insufficient Points
+                                </button>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% empty %}
+            <div class="col-12">
+                <div class="text-center py-5">
+                    <i class="fas fa-search fa-3x text-muted mb-3"></i>
+                    <h4>No rewards found</h4>
+                    <p class="text-muted">Try adjusting your filters to see more rewards.</p>
+                    <a href="{% url 'loyalty:rewards_catalog' %}" class="btn btn-primary">
+                        View All Rewards
+                    </a>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+
+    <!-- Pagination -->
+    {% if page_obj.has_other_pages %}
+        <nav aria-label="Rewards pagination" class="mt-4">
+            <ul class="pagination justify-content-center">
+                {% if page_obj.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page=1{% if request.GET.category %}&category={{ request.GET.category }}{% endif %}{% if request.GET.max_points %}&max_points={{ request.GET.max_points }}{% endif %}{% if request.GET.available_only %}&available_only={{ request.GET.available_only }}{% endif %}">
+                            <i class="fas fa-angle-double-left"></i>
+                        </a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if request.GET.category %}&category={{ request.GET.category }}{% endif %}{% if request.GET.max_points %}&max_points={{ request.GET.max_points }}{% endif %}{% if request.GET.available_only %}&available_only={{ request.GET.available_only }}{% endif %}">
+                            <i class="fas fa-angle-left"></i>
+                        </a>
+                    </li>
+                {% endif %}
+                
+                {% for num in page_obj.paginator.page_range %}
+                    {% if page_obj.number == num %}
+                        <li class="page-item active">
+                            <span class="page-link">{{ num }}</span>
+                        </li>
+                    {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ num }}{% if request.GET.category %}&category={{ request.GET.category }}{% endif %}{% if request.GET.max_points %}&max_points={{ request.GET.max_points }}{% endif %}{% if request.GET.available_only %}&available_only={{ request.GET.available_only }}{% endif %}">
+                                {{ num }}
+                            </a>
+                        </li>
+                    {% endif %}
+                {% endfor %}
+                
+                {% if page_obj.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if request.GET.category %}&category={{ request.GET.category }}{% endif %}{% if request.GET.max_points %}&max_points={{ request.GET.max_points }}{% endif %}{% if request.GET.available_only %}&available_only={{ request.GET.available_only }}{% endif %}">
+                            <i class="fas fa-angle-right"></i>
+                        </a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}{% if request.GET.category %}&category={{ request.GET.category }}{% endif %}{% if request.GET.max_points %}&max_points={{ request.GET.max_points }}{% endif %}{% if request.GET.available_only %}&available_only={{ request.GET.available_only }}{% endif %}">
+                            <i class="fas fa-angle-double-right"></i>
+                        </a>
+                    </li>
+                {% endif %}
+            </ul>
+        </nav>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Auto-submit form on filter changes
+document.getElementById('category').addEventListener('change', function() {
+    document.getElementById('filter-form').submit();
+});
+
+document.getElementById('available_only').addEventListener('change', function() {
+    document.getElementById('filter-form').submit();
+});
+
+// Add loading state to cards when clicked
+document.querySelectorAll('.reward-card .btn-primary').forEach(function(button) {
+    button.addEventListener('click', function() {
+        this.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Loading...';
+        this.disabled = true;
+    });
+});
+</script>
+{% endblock %}

@@ -1,0 +1,338 @@
+{% extends 'base.html' %}
+
+{% block title %}Create Your Novaryo Account{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row min-vh-100">
+        <!-- Left side - Registration Form -->
+        <div class="col-lg-6 d-flex align-items-center">
+            <div class="w-100 px-4 px-lg-5 py-4">
+                <div class="auth-form mx-auto" style="max-width: 450px;">
+                    <!-- Header -->
+                    <div class="text-center mb-4">
+                        <a href="{% url 'hotels:home' %}" class="text-decoration-none">
+                            <h2 class="text-primary fw-bold">
+                                <i class="bi bi-building"></i> Novaryo
+                            </h2>
+                        </a>
+                        <h4 class="mb-2">Create your account</h4>
+                        <p class="text-muted">Join thousands of travelers worldwide</p>
+                    </div>
+
+                    <!-- Social Registration Buttons -->
+                    <div class="social-login mb-4">
+                        <div class="d-grid gap-2 mb-3">
+                            <a href="#" class="btn btn-outline-danger">
+                                <i class="bi bi-google me-2"></i> Sign up with Google
+                            </a>
+                            <a href="#" class="btn btn-outline-primary">
+                                <i class="bi bi-facebook me-2"></i> Sign up with Facebook
+                            </a>
+                        </div>
+                        
+                        <div class="divider text-center my-4">
+                            <span class="bg-white px-3 text-muted">or</span>
+                        </div>
+                    </div>
+
+                    <!-- Registration Form -->
+                    <form method="post">
+                        {% csrf_token %}
+                        
+                        {% if form.non_field_errors %}
+                            <div class="alert alert-danger">
+                                {{ form.non_field_errors }}
+                            </div>
+                        {% endif %}
+
+                        <!-- Name Fields -->
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="{{ form.first_name.id_for_label }}" class="form-label">
+                                    {{ form.first_name.label }} <span class="text-danger">*</span>
+                                </label>
+                                {{ form.first_name }}
+                                {% if form.first_name.errors %}
+                                    <div class="text-danger small mt-1">
+                                        {{ form.first_name.errors.0 }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-6">
+                                <label for="{{ form.last_name.id_for_label }}" class="form-label">
+                                    {{ form.last_name.label }} <span class="text-danger">*</span>
+                                </label>
+                                {{ form.last_name }}
+                                {% if form.last_name.errors %}
+                                    <div class="text-danger small mt-1">
+                                        {{ form.last_name.errors.0 }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <!-- Email Field -->
+                        <div class="mb-3">
+                            <label for="{{ form.email.id_for_label }}" class="form-label">
+                                {{ form.email.label }} <span class="text-danger">*</span>
+                            </label>
+                            {{ form.email }}
+                            {% if form.email.errors %}
+                                <div class="text-danger small mt-1">
+                                    {{ form.email.errors.0 }}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Phone and Currency -->
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="{{ form.phone_number.id_for_label }}" class="form-label">
+                                    {{ form.phone_number.label }}
+                                </label>
+                                {{ form.phone_number }}
+                                {% if form.phone_number.errors %}
+                                    <div class="text-danger small mt-1">
+                                        {{ form.phone_number.errors.0 }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-6">
+                                <label for="{{ form.preferred_currency.id_for_label }}" class="form-label">
+                                    {{ form.preferred_currency.label }}
+                                </label>
+                                {{ form.preferred_currency }}
+                                {% if form.preferred_currency.errors %}
+                                    <div class="text-danger small mt-1">
+                                        {{ form.preferred_currency.errors.0 }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <!-- Password Fields -->
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="{{ form.password1.id_for_label }}" class="form-label">
+                                    {{ form.password1.label }} <span class="text-danger">*</span>
+                                </label>
+                                <div class="password-field position-relative">
+                                    {{ form.password1 }}
+                                    <button type="button" class="btn btn-link position-absolute end-0 top-50 translate-middle-y pe-3" 
+                                            onclick="togglePassword('password1')" style="z-index: 10; border: none;">
+                                        <i class="bi bi-eye" id="togglePassword1Icon"></i>
+                                    </button>
+                                </div>
+                                {% if form.password1.errors %}
+                                    <div class="text-danger small mt-1">
+                                        {{ form.password1.errors.0 }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-6">
+                                <label for="{{ form.password2.id_for_label }}" class="form-label">
+                                    {{ form.password2.label }} <span class="text-danger">*</span>
+                                </label>
+                                <div class="password-field position-relative">
+                                    {{ form.password2 }}
+                                    <button type="button" class="btn btn-link position-absolute end-0 top-50 translate-middle-y pe-3" 
+                                            onclick="togglePassword('password2')" style="z-index: 10; border: none;">
+                                        <i class="bi bi-eye" id="togglePassword2Icon"></i>
+                                    </button>
+                                </div>
+                                {% if form.password2.errors %}
+                                    <div class="text-danger small mt-1">
+                                        {{ form.password2.errors.0 }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <!-- Password Requirements -->
+                        <div class="password-requirements mb-4">
+                            <p class="small text-muted mb-2">Password must contain:</p>
+                            <ul class="small text-muted list-unstyled">
+                                <li><i class="bi bi-check2 text-success me-1"></i> At least 8 characters</li>
+                                <li><i class="bi bi-check2 text-success me-1"></i> A mix of letters and numbers</li>
+                                <li><i class="bi bi-check2 text-success me-1"></i> At least one special character</li>
+                            </ul>
+                        </div>
+
+                        <!-- Terms and Marketing -->
+                        <div class="mb-4">
+                            <div class="form-check mb-2">
+                                {{ form.agree_to_terms }}
+                                <label class="form-check-label" for="{{ form.agree_to_terms.id_for_label }}">
+                                    I agree to the 
+                                    <a href="#" class="text-decoration-none">Terms of Service</a> 
+                                    and 
+                                    <a href="#" class="text-decoration-none">Privacy Policy</a>
+                                    <span class="text-danger">*</span>
+                                </label>
+                                {% if form.agree_to_terms.errors %}
+                                    <div class="text-danger small mt-1">
+                                        {{ form.agree_to_terms.errors.0 }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="form-check">
+                                {{ form.marketing_emails }}
+                                <label class="form-check-label" for="{{ form.marketing_emails.id_for_label }}">
+                                    {{ form.marketing_emails.label }}
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Submit Button -->
+                        <div class="d-grid gap-2 mb-4">
+                            <button type="submit" class="btn btn-primary py-2">
+                                <i class="bi bi-person-plus me-2"></i>
+                                Create Account
+                            </button>
+                        </div>
+
+                        <!-- Login link -->
+                        <div class="text-center">
+                            <p class="mb-0">
+                                Already have an account? 
+                                <a href="{% url 'users:login' %}" class="text-decoration-none fw-semibold">
+                                    Sign in here
+                                </a>
+                            </p>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right side - Hero Content -->
+        <div class="col-lg-6 d-none d-lg-block position-relative" 
+             style="background: linear-gradient(135deg, var(--novaryo-primary) 0%, var(--novaryo-secondary) 100%);">
+            <div class="d-flex align-items-center justify-content-center h-100 text-white p-5">
+                <div class="text-center">
+                    <i class="bi bi-globe fs-1 mb-4"></i>
+                    <h3 class="fw-bold mb-3">Welcome to Novaryo</h3>
+                    <p class="lead">
+                        Join millions of travelers who trust us to find the best deals and create unforgettable experiences.
+                    </p>
+                    
+                    <!-- Benefits List -->
+                    <div class="benefits-list mt-4">
+                        <div class="d-flex align-items-center mb-3">
+                            <i class="bi bi-gift-fill me-3 text-warning"></i>
+                            <span>Exclusive member-only deals</span>
+                        </div>
+                        <div class="d-flex align-items-center mb-3">
+                            <i class="bi bi-heart-fill me-3 text-warning"></i>
+                            <span>Save your favorite properties</span>
+                        </div>
+                        <div class="d-flex align-items-center mb-3">
+                            <i class="bi bi-bell-fill me-3 text-warning"></i>
+                            <span>Get price drop alerts</span>
+                        </div>
+                        <div class="d-flex align-items-center">
+                            <i class="bi bi-award-fill me-3 text-warning"></i>
+                            <span>Earn rewards with every booking</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+.divider {
+    position: relative;
+}
+
+.divider::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background-color: #dee2e6;
+    z-index: 1;
+}
+
+.divider span {
+    position: relative;
+    z-index: 2;
+}
+
+.password-field {
+    position: relative;
+}
+
+.auth-form .form-control:focus {
+    border-color: var(--novaryo-primary);
+    box-shadow: 0 0 0 0.2rem rgba(44, 82, 130, 0.25);
+}
+
+.btn-outline-danger:hover {
+    background-color: #dc3545;
+    border-color: #dc3545;
+}
+
+.benefits-list {
+    text-align: left;
+    max-width: 350px;
+    margin: 0 auto;
+}
+
+.password-requirements {
+    background-color: #f8f9fa;
+    border-radius: 0.5rem;
+    padding: 1rem;
+}
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function togglePassword(fieldName) {
+    const passwordInput = document.getElementById('id_' + fieldName);
+    const toggleIcon = document.getElementById('toggle' + fieldName.charAt(0).toUpperCase() + fieldName.slice(1) + 'Icon');
+    
+    if (passwordInput.type === 'password') {
+        passwordInput.type = 'text';
+        toggleIcon.classList.remove('bi-eye');
+        toggleIcon.classList.add('bi-eye-slash');
+    } else {
+        passwordInput.type = 'password';
+        toggleIcon.classList.remove('bi-eye-slash');
+        toggleIcon.classList.add('bi-eye');
+    }
+}
+
+// Form validation enhancement
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.querySelector('form');
+    const password1 = document.getElementById('id_password1');
+    const password2 = document.getElementById('id_password2');
+    
+    // Real-time password matching validation
+    if (password2) {
+        password2.addEventListener('input', function() {
+            if (password1.value !== password2.value) {
+                password2.setCustomValidity('Passwords do not match');
+            } else {
+                password2.setCustomValidity('');
+            }
+        });
+    }
+    
+    // Auto-focus first input
+    const firstInput = document.querySelector('form input:first-of-type');
+    if (firstInput) {
+        firstInput.focus();
+    }
+});
+</script>
+{% endblock %}

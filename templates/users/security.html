@@ -1,0 +1,232 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Security Settings - Novaryo{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row">
+        <div class="col-12 mb-4">
+            <h2><i class="bi bi-shield-lock me-2"></i>Security Settings</h2>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'users:dashboard' %}">Dashboard</a></li>
+                    <li class="breadcrumb-item active">Security</li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <div class="row">
+        <div class="col-lg-8">
+            <!-- Change Password -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="card-title mb-0"><i class="bi bi-key me-2"></i>Change Password</h5>
+                </div>
+                <div class="card-body">
+                    <form method="post" action="{% url 'account_change_password' %}">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <label for="currentPassword" class="form-label">Current Password</label>
+                            <input type="password" class="form-control" id="currentPassword" name="old_password" required>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="newPassword" class="form-label">New Password</label>
+                            <input type="password" class="form-control" id="newPassword" name="new_password1" required>
+                            <div class="form-text">Password must be at least 8 characters long and contain letters and numbers.</div>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <label for="confirmPassword" class="form-label">Confirm New Password</label>
+                            <input type="password" class="form-control" id="confirmPassword" name="new_password2" required>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-shield-check me-2"></i>Update Password
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Account Verification -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="card-title mb-0"><i class="bi bi-patch-check me-2"></i>Account Verification</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <div class="d-flex align-items-center">
+                                {% if is_email_verified %}
+                                    <i class="bi bi-check-circle-fill text-success fs-4 me-3"></i>
+                                    <div>
+                                        <strong>Email Verified</strong>
+                                        <div class="text-muted small">{{ user.email }}</div>
+                                    </div>
+                                {% else %}
+                                    <i class="bi bi-exclamation-circle-fill text-warning fs-4 me-3"></i>
+                                    <div>
+                                        <strong>Email Not Verified</strong>
+                                        <div class="text-muted small">{{ user.email }}</div>
+                                        <a href="#" class="btn btn-sm btn-outline-warning mt-1">Verify Email</a>
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            <div class="d-flex align-items-center">
+                                {% if is_phone_verified %}
+                                    <i class="bi bi-check-circle-fill text-success fs-4 me-3"></i>
+                                    <div>
+                                        <strong>Phone Verified</strong>
+                                        <div class="text-muted small">{{ user.phone_number|default:"Not provided" }}</div>
+                                    </div>
+                                {% else %}
+                                    <i class="bi bi-exclamation-circle-fill text-warning fs-4 me-3"></i>
+                                    <div>
+                                        <strong>Phone Not Verified</strong>
+                                        <div class="text-muted small">{{ user.phone_number|default:"Not provided" }}</div>
+                                        {% if user.phone_number %}
+                                            <a href="#" class="btn btn-sm btn-outline-warning mt-1">Verify Phone</a>
+                                        {% else %}
+                                            <a href="{% url 'users:profile' %}" class="btn btn-sm btn-outline-primary mt-1">Add Phone</a>
+                                        {% endif %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Two-Factor Authentication -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="card-title mb-0"><i class="bi bi-shield-fill-check me-2"></i>Two-Factor Authentication</h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div>
+                            <h6 class="mb-1">Authenticator App</h6>
+                            <p class="text-muted mb-0">Add an extra layer of security to your account</p>
+                        </div>
+                        <div>
+                            <span class="badge bg-secondary">Coming Soon</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <!-- Security Status -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="card-title mb-0"><i class="bi bi-shield me-2"></i>Security Status</h5>
+                </div>
+                <div class="card-body">
+                    <div class="text-center">
+                        {% if is_email_verified %}
+                            <div class="text-success mb-3">
+                                <i class="bi bi-shield-fill-check" style="font-size: 3rem;"></i>
+                            </div>
+                            <h6 class="text-success">Good Security</h6>
+                            <p class="text-muted small">Your account has basic security measures in place.</p>
+                        {% else %}
+                            <div class="text-warning mb-3">
+                                <i class="bi bi-shield-exclamation" style="font-size: 3rem;"></i>
+                            </div>
+                            <h6 class="text-warning">Needs Attention</h6>
+                            <p class="text-muted small">Please verify your email address to improve your account security.</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Login Activity -->
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0"><i class="bi bi-clock-history me-2"></i>Recent Activity</h5>
+                </div>
+                <div class="card-body">
+                    {% if recent_logins %}
+                        {% for login in recent_logins %}
+                            <div class="d-flex align-items-center mb-3">
+                                {% if login.login_successful %}
+                                    <i class="bi bi-check-circle-fill text-success me-2"></i>
+                                {% else %}
+                                    <i class="bi bi-x-circle-fill text-danger me-2"></i>
+                                {% endif %}
+                                <div class="flex-grow-1">
+                                    <div class="fw-bold small">
+                                        {% if login.login_successful %}Successful Login{% else %}Failed Login{% endif %}
+                                    </div>
+                                    <div class="text-muted small">
+                                        {{ login.login_date|date:"M d, Y H:i" }}<br>
+                                        IP: {{ login.ip_address }}
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    {% else %}
+                        <p class="text-muted text-center mb-0">No recent activity</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Security Tips -->
+            <div class="card mt-3">
+                <div class="card-header">
+                    <h5 class="card-title mb-0"><i class="bi bi-lightbulb me-2"></i>Security Tips</h5>
+                </div>
+                <div class="card-body">
+                    <ul class="list-unstyled mb-0">
+                        <li class="mb-2">
+                            <i class="bi bi-check-circle text-success me-2"></i>
+                            <strong>Use a strong password</strong> with letters, numbers, and symbols
+                        </li>
+                        <li class="mb-2">
+                            <i class="bi bi-check-circle text-success me-2"></i>
+                            <strong>Verify your email</strong> to recover your account if needed
+                        </li>
+                        <li class="mb-0">
+                            <i class="bi bi-check-circle text-success me-2"></i>
+                            <strong>Review login activity</strong> regularly for suspicious access
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="card mt-3">
+                <div class="card-body">
+                    <h6 class="card-title">Quick Actions</h6>
+                    <div class="d-grid gap-2">
+                        <a href="{% url 'users:profile' %}" class="btn btn-outline-secondary btn-sm">
+                            <i class="bi bi-person me-2"></i>Edit Profile
+                        </a>
+                        <a href="{% url 'users:preferences' %}" class="btn btn-outline-secondary btn-sm">
+                            <i class="bi bi-gear me-2"></i>Preferences
+                        </a>
+                        <a href="{% url 'users:dashboard' %}" class="btn btn-outline-primary btn-sm">
+                            <i class="bi bi-speedometer2 me-2"></i>Back to Dashboard
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

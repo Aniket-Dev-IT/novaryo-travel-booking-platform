@@ -1,0 +1,43 @@
+{% extends 'base.html' %}
+
+{% block title %}Registration Successful - Novaryo{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="text-center py-5">
+                <!-- Success Icon -->
+                <div class="mb-4">
+                    <i class="bi bi-check-circle-fill text-success" style="font-size: 4rem;"></i>
+                </div>
+                
+                <!-- Success Message -->
+                <h2 class="text-success mb-3">Registration Successful!</h2>
+                <p class="lead mb-4">
+                    Welcome to Novaryo! Your account has been created successfully.
+                </p>
+                
+                <!-- Email Verification Notice -->
+                <div class="alert alert-info">
+                    <i class="bi bi-info-circle me-2"></i>
+                    <strong>Please check your email</strong><br>
+                    We've sent you a verification link to activate your account.
+                </div>
+                
+                <!-- Action Buttons -->
+                <div class="d-grid gap-2 d-md-block">
+                    <a href="{% url 'users:login' %}" class="btn btn-primary">
+                        <i class="bi bi-box-arrow-in-right me-2"></i>
+                        Continue to Sign In
+                    </a>
+                    <a href="{% url 'hotels:home' %}" class="btn btn-outline-primary">
+                        <i class="bi bi-house me-2"></i>
+                        Browse Hotels
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

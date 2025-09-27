@@ -1,0 +1,97 @@
+{% extends 'base.html' %}
+
+{% block title %}Terms of Service - Novaryo{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="row">
+        <div class="col-lg-8 mx-auto">
+            <div class="card shadow-sm">
+                <div class="card-body p-5">
+                    <div class="text-center mb-5">
+                        <h1 class="text-primary fw-bold mb-2">Terms of Service</h1>
+                        <p class="text-muted">Last updated: {% now "F d, Y" %}</p>
+                    </div>
+
+                    <div class="mb-4">
+                        <h3 class="text-primary mb-3">1. Acceptance of Terms</h3>
+                        <p>By accessing and using the Novaryo platform, you accept and agree to be bound by the terms and provision of this agreement.</p>
+                    </div>
+
+                    <div class="mb-4">
+                        <h3 class="text-primary mb-3">2. Booking and Payment</h3>
+                        <ul>
+                            <li>All bookings are subject to availability and confirmation</li>
+                            <li>Payment must be made in full at the time of booking</li>
+                            <li>Prices are subject to change without notice until booking is confirmed</li>
+                            <li>Currency conversions are provided for reference only</li>
+                        </ul>
+                    </div>
+
+                    <div class="mb-4">
+                        <h3 class="text-primary mb-3">3. Cancellation and Refunds</h3>
+                        <ul>
+                            <li>Cancellation policies vary by accommodation and booking type</li>
+                            <li>Refunds are processed according to the specific cancellation policy</li>
+                            <li>Processing fees may apply to cancellations and modifications</li>
+                            <li>Force majeure events may affect standard cancellation terms</li>
+                        </ul>
+                    </div>
+
+                    <div class="mb-4">
+                        <h3 class="text-primary mb-3">4. User Responsibilities</h3>
+                        <ul>
+                            <li>Provide accurate and complete information when booking</li>
+                            <li>Comply with all applicable laws and regulations</li>
+                            <li>Respect the property and other guests</li>
+                            <li>Maintain the confidentiality of your account credentials</li>
+                        </ul>
+                    </div>
+
+                    <div class="mb-4">
+                        <h3 class="text-primary mb-3">5. Limitation of Liability</h3>
+                        <p>Novaryo acts as an intermediary between you and accommodation providers. We are not liable for:</p>
+                        <ul>
+                            <li>The quality or condition of accommodations</li>
+                            <li>Actions or omissions of third-party service providers</li>
+                            <li>Force majeure events beyond our control</li>
+                            <li>Personal injury or property damage during your stay</li>
+                        </ul>
+                    </div>
+
+                    <div class="mb-4">
+                        <h3 class="text-primary mb-3">6. Loyalty Program</h3>
+                        <ul>
+                            <li>Loyalty points are earned on eligible bookings only</li>
+                            <li>Points have no cash value and cannot be transferred</li>
+                            <li>Loyalty benefits may change or be discontinued</li>
+                            <li>Fraud or abuse may result in account termination</li>
+                        </ul>
+                    </div>
+
+                    <div class="mb-4">
+                        <h3 class="text-primary mb-3">7. Modifications to Terms</h3>
+                        <p>Novaryo reserves the right to modify these terms at any time. Continued use of the platform constitutes acceptance of revised terms.</p>
+                    </div>
+
+                    <div class="mb-4">
+                        <h3 class="text-primary mb-3">8. Contact Information</h3>
+                        <p>For questions about these Terms of Service:</p>
+                        <ul class="list-unstyled">
+                            <li><strong>Email:</strong> legal@novaryo.com</li>
+                            <li><strong>Phone:</strong> +1 (555) 123-4567</li>
+                            <li><strong>Address:</strong> Novaryo Legal Department, 123 Travel Street, City, State 12345</li>
+                        </ul>
+                    </div>
+
+                    <div class="text-center mt-5">
+                        <a href="{% url 'home' %}" class="btn btn-primary">
+                            <i class="bi bi-house me-2"></i>Back to Home
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

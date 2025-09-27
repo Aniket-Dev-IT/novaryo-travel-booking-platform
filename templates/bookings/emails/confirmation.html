@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Booking Confirmation - {{ booking.booking_reference }}</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background-color: #f8f9fa;
+            margin: 0;
+            padding: 0;
+        }
+        .email-container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px 20px;
+            text-align: center;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 24px;
+            font-weight: 300;
+        }
+        .content {
+            padding: 30px 20px;
+        }
+        .confirmation-box {
+            background-color: #d4edda;
+            border: 1px solid #c3e6cb;
+            border-radius: 6px;
+            padding: 20px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        .booking-ref {
+            font-size: 24px;
+            font-weight: bold;
+            color: #155724;
+            margin: 10px 0;
+        }
+        .flight-info {
+            background-color: #f8f9fa;
+            border-radius: 6px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        .flight-route {
+            font-size: 20px;
+            font-weight: bold;
+            margin-bottom: 15px;
+            color: #495057;
+        }
+        .flight-details {
+            display: flex;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+        .detail-item {
+            flex: 1;
+            min-width: 150px;
+        }
+        .detail-label {
+            font-size: 12px;
+            color: #6c757d;
+            text-transform: uppercase;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        .detail-value {
+            font-size: 16px;
+            color: #495057;
+            font-weight: 500;
+        }
+        .passenger-info {
+            background-color: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 6px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        .payment-info {
+            background-color: #e2e3f2;
+            border-radius: 6px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        .price-summary {
+            border-top: 2px solid #667eea;
+            padding-top: 15px;
+            margin-top: 15px;
+        }
+        .total-price {
+            font-size: 24px;
+            font-weight: bold;
+            color: #667eea;
+            text-align: right;
+        }
+        .important-info {
+            background-color: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 6px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        .footer {
+            background-color: #495057;
+            color: white;
+            padding: 20px;
+            text-align: center;
+            font-size: 14px;
+        }
+        .footer a {
+            color: #adb5bd;
+            text-decoration: none;
+        }
+        @media (max-width: 600px) {
+            .flight-details {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="email-container">
+        <div class="header">
+            <h1>🛫 Booking Confirmed!</h1>
+            <p>Thank you for choosing Novaryo</p>
+        </div>
+        
+        <div class="content">
+            <div class="confirmation-box">
+                <h2>✅ Your booking is confirmed!</h2>
+                <div class="booking-ref">{{ booking.booking_reference }}</div>
+                <p>Please save this confirmation for your records.</p>
+            </div>
+            
+            <div class="flight-info">
+                <div class="flight-route">
+                    {{ booking.flight.origin }} → {{ booking.flight.destination }}
+                </div>
+                
+                <div class="flight-details">
+                    <div class="detail-item">
+                        <div class="detail-label">Flight</div>
+                        <div class="detail-value">{{ booking.flight.flight_number }}</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">Departure</div>
+                        <div class="detail-value">{{ booking.flight.departure_time|date:"M d, Y" }}<br>{{ booking.flight.departure_time|time:"g:i A" }}</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">Arrival</div>
+                        <div class="detail-value">{{ booking.flight.arrival_time|date:"M d, Y" }}<br>{{ booking.flight.arrival_time|time:"g:i A" }}</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">Class</div>
+                        <div class="detail-value">{{ booking.get_cabin_class_display }}</div>
+                    </div>
+                </div>
+            </div>
+            
+            {% if passenger %}
+            <div class="passenger-info">
+                <h3>👤 Passenger Information</h3>
+                <p><strong>{{ passenger.display_name }}</strong></p>
+                {% if passenger.passport_number %}
+                <p><strong>Passport:</strong> {{ passenger.passport_number }} ({{ passenger.passport_country }})</p>
+                {% endif %}
+                {% if passenger.meal_preference %}
+                <p><strong>Meal Preference:</strong> {{ passenger.get_meal_preference_display }}</p>
+                {% endif %}
+                {% if passenger.seat_preference %}
+                <p><strong>Seat Preference:</strong> {{ passenger.get_seat_preference_display }}</p>
+                {% endif %}
+            </div>
+            {% endif %}
+            
+            <div class="payment-info">
+                <h3>💳 Payment Information</h3>
+                <p><strong>Payment Method:</strong> {{ booking.get_payment_method_display }}</p>
+                <p><strong>Payment Status:</strong> {{ booking.payment_status|capfirst }}</p>
+                {% if booking.payment_reference %}
+                <p><strong>Payment Reference:</strong> {{ booking.payment_reference }}</p>
+                {% endif %}
+                
+                <div class="price-summary">
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                        <span>Base Price:</span>
+                        <span>${{ booking.base_price }}</span>
+                    </div>
+                    {% if booking.taxes_and_fees > 0 %}
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                        <span>Taxes & Fees:</span>
+                        <span>${{ booking.taxes_and_fees }}</span>
+                    </div>
+                    {% endif %}
+                    <div class="total-price">
+                        Total: ${{ booking.total_price }} {{ booking.currency }}
+                    </div>
+                </div>
+            </div>
+            
+            <div class="important-info">
+                <h3>📋 Important Information</h3>
+                <ul>
+                    <li>Please arrive at the airport at least 2 hours before domestic flights and 3 hours before international flights.</li>
+                    <li>Ensure your travel documents (passport/ID) are valid and match the booking details.</li>
+                    <li>Check-in online 24 hours before departure to save time at the airport.</li>
+                    <li>Review the airline's baggage policies before traveling.</li>
+                </ul>
+            </div>
+            
+            <div style="text-align: center; margin: 30px 0;">
+                <p>Have questions? Contact our support team at <a href="mailto:{{ support_email }}">{{ support_email }}</a></p>
+                <p>Thank you for choosing Novaryo. Have a wonderful trip! ✈️</p>
+            </div>
+        </div>
+        
+        <div class="footer">
+            <p>&copy; {{ year }} Novaryo. All rights reserved.</p>
+            <p>
+                <a href="mailto:{{ support_email }}">Support</a> • 
+                <a href="https://{{ site.domain }}">{{ site.name }}</a>
+            </p>
+        </div>
+    </div>
+</body>
+</html>

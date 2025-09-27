@@ -1,0 +1,564 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Promotions - {{ block.super }}{% endblock %}
+
+{% block extra_css %}
+<style>
+.promotion-card {
+    border: none;
+    border-radius: 15px;
+    overflow: hidden;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    height: 100%;
+    position: relative;
+}
+
+.promotion-card:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 8px 30px rgba(0,0,0,0.15);
+}
+
+.promotion-card.eligible {
+    border: 2px solid #28a745;
+    box-shadow: 0 4px 20px rgba(40, 167, 69, 0.2);
+}
+
+.promotion-card.eligible::before {
+    content: "Available to You";
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    background: #28a745;
+    color: white;
+    padding: 0.25rem 0.75rem;
+    border-radius: 15px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    z-index: 10;
+}
+
+.promotion-header {
+    padding: 2rem 1.5rem 1rem;
+    background: linear-gradient(135deg, var(--promo-color-start) 0%, var(--promo-color-end) 100%);
+    color: white;
+    position: relative;
+    text-align: center;
+}
+
+.promotion-type {
+    font-size: 0.875rem;
+    opacity: 0.9;
+    margin-bottom: 0.5rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.promotion-name {
+    font-size: 1.5rem;
+    font-weight: bold;
+    margin-bottom: 1rem;
+    line-height: 1.2;
+}
+
+.promotion-value {
+    font-size: 2.5rem;
+    font-weight: bold;
+    margin-bottom: 0.5rem;
+}
+
+.promotion-details {
+    padding: 1.5rem;
+}
+
+.promotion-description {
+    color: #6c757d;
+    margin-bottom: 1.5rem;
+    line-height: 1.6;
+}
+
+.promotion-stats {
+    background: #f8f9fa;
+    border-radius: 10px;
+    padding: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.stat-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.5rem;
+}
+
+.stat-row:last-child {
+    margin-bottom: 0;
+}
+
+.validity-info {
+    background: linear-gradient(135deg, #ffeaa7 0%, #fab1a0 100%);
+    color: #2d3436;
+    padding: 1rem;
+    border-radius: 10px;
+    margin-bottom: 1rem;
+    text-align: center;
+    font-weight: 600;
+}
+
+.countdown-timer {
+    font-size: 1.1rem;
+    color: #e17055;
+    font-weight: bold;
+}
+
+.eligibility-requirements {
+    background: #e3f2fd;
+    border: 1px solid #bbdefb;
+    border-radius: 10px;
+    padding: 1rem;
+    margin-bottom: 1rem;
+}
+
+.requirement-item {
+    display: flex;
+    align-items: center;
+    margin-bottom: 0.5rem;
+}
+
+.requirement-item:last-child {
+    margin-bottom: 0;
+}
+
+.requirement-icon {
+    color: #1976d2;
+    margin-right: 0.5rem;
+    width: 16px;
+}
+
+.breadcrumb-custom {
+    background: transparent;
+    padding: 0;
+    margin-bottom: 2rem;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 4rem 2rem;
+    color: #6c757d;
+}
+
+.section-divider {
+    border-top: 2px solid #e9ecef;
+    margin: 3rem 0;
+    position: relative;
+}
+
+.section-divider::after {
+    content: attr(data-title);
+    position: absolute;
+    top: -12px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #fff;
+    padding: 0 1rem;
+    color: #6c757d;
+    font-weight: 600;
+    font-size: 0.875rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+/* Promotion type color schemes */
+.points-multiplier {
+    --promo-color-start: #667eea;
+    --promo-color-end: #764ba2;
+}
+
+.bonus-points {
+    --promo-color-start: #f093fb;
+    --promo-color-end: #f5576c;
+}
+
+.tier-bonus {
+    --promo-color-start: #4facfe;
+    --promo-color-end: #00f2fe;
+}
+
+.spending-bonus {
+    --promo-color-start: #43e97b;
+    --promo-color-end: #38f9d7;
+}
+
+.double-points {
+    --promo-color-start: #fa709a;
+    --promo-color-end: #fee140;
+}
+
+.usage-progress {
+    width: 100%;
+    height: 8px;
+    background: #e9ecef;
+    border-radius: 4px;
+    overflow: hidden;
+    margin-top: 0.5rem;
+}
+
+.usage-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #28a745, #20c997);
+    border-radius: 4px;
+    transition: width 0.3s ease;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <!-- Breadcrumb -->
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb breadcrumb-custom">
+            <li class="breadcrumb-item"><a href="{% url 'loyalty:dashboard' %}">Loyalty</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Promotions</li>
+        </ol>
+    </nav>
+
+    <!-- Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="text-center">
+                <h1 class="h2 mb-2">Active Promotions</h1>
+                <p class="text-muted mb-0">Boost your points earning with exclusive offers</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Member Status -->
+    <div class="card mb-4">
+        <div class="card-body text-center">
+            <div class="row align-items-center">
+                <div class="col-md-4">
+                    <h6 class="text-muted">Current Tier</h6>
+                    <div class="h4 mb-0" style="color: {{ membership.tier.color_code }};">
+                        {{ membership.tier.name }}
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <h6 class="text-muted">Points Balance</h6>
+                    <div class="h4 mb-0 text-primary">{{ membership.points_balance|floatformat:0 }}</div>
+                </div>
+                <div class="col-md-4">
+                    <h6 class="text-muted">Annual Spending</h6>
+                    <div class="h4 mb-0 text-success">${{ membership.annual_spending|floatformat:0 }}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Eligible Promotions -->
+    {% if eligible_promotions %}
+        <div class="row">
+            {% for promotion in eligible_promotions %}
+                <div class="col-lg-6 col-xl-4 mb-4">
+                    <div class="promotion-card eligible {{ promotion.promotion_type|slugify }}">
+                        <!-- Promotion Header -->
+                        <div class="promotion-header">
+                            <div class="promotion-type">{{ promotion.get_promotion_type_display }}</div>
+                            <div class="promotion-name">{{ promotion.name }}</div>
+                            
+                            {% if promotion.promotion_type == 'points_multiplier' or promotion.promotion_type == 'double_points' %}
+                                <div class="promotion-value">{{ promotion.multiplier }}x</div>
+                                <div style="opacity: 0.9;">Points Multiplier</div>
+                            {% elif promotion.promotion_type == 'bonus_points' %}
+                                <div class="promotion-value">+{{ promotion.bonus_points }}</div>
+                                <div style="opacity: 0.9;">Bonus Points</div>
+                            {% endif %}
+                        </div>
+                        
+                        <!-- Promotion Details -->
+                        <div class="promotion-details">
+                            <div class="promotion-description">{{ promotion.description }}</div>
+                            
+                            <!-- Validity -->
+                            <div class="validity-info">
+                                <div><i class="fas fa-clock me-2"></i>Valid until {{ promotion.valid_until|date:"M d, Y" }}</div>
+                                <div class="countdown-timer mt-1" data-end-date="{{ promotion.valid_until|date:'c' }}">
+                                    Calculating time remaining...
+                                </div>
+                            </div>
+                            
+                            <!-- Promotion Stats -->
+                            <div class="promotion-stats">
+                                <div class="stat-row">
+                                    <span>Usage Limit per Member:</span>
+                                    <strong>{{ promotion.max_uses_per_member }}</strong>
+                                </div>
+                                {% if promotion.minimum_spending > 0 %}
+                                    <div class="stat-row">
+                                        <span>Minimum Spending:</span>
+                                        <strong>${{ promotion.minimum_spending|floatformat:0 }}</strong>
+                                    </div>
+                                {% endif %}
+                                
+                                <!-- Usage Progress -->
+                                {% with usage_count=promotion.usages.count %}
+                                    <div class="stat-row">
+                                        <span>Your Usage:</span>
+                                        <strong>{{ usage_count }} / {{ promotion.max_uses_per_member }}</strong>
+                                    </div>
+                                    <div class="usage-progress">
+                                        <div class="usage-fill" style="width: {% widthratio usage_count promotion.max_uses_per_member 100 %}%;"></div>
+                                    </div>
+                                {% endwith %}
+                            </div>
+                            
+                            <!-- Action -->
+                            <div class="d-grid">
+                                <a href="{% url 'bookings:search' %}" class="btn btn-success">
+                                    <i class="fas fa-plane me-2"></i>Book Flight & Earn
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    <!-- Section Divider -->
+    {% if eligible_promotions and other_promotions %}
+        <div class="section-divider" data-title="Other Promotions"></div>
+    {% endif %}
+
+    <!-- Other Promotions -->
+    {% if other_promotions %}
+        <div class="row">
+            {% for promotion in other_promotions %}
+                <div class="col-lg-6 col-xl-4 mb-4">
+                    <div class="promotion-card {{ promotion.promotion_type|slugify }}">
+                        <!-- Promotion Header -->
+                        <div class="promotion-header">
+                            <div class="promotion-type">{{ promotion.get_promotion_type_display }}</div>
+                            <div class="promotion-name">{{ promotion.name }}</div>
+                            
+                            {% if promotion.promotion_type == 'points_multiplier' or promotion.promotion_type == 'double_points' %}
+                                <div class="promotion-value">{{ promotion.multiplier }}x</div>
+                                <div style="opacity: 0.9;">Points Multiplier</div>
+                            {% elif promotion.promotion_type == 'bonus_points' %}
+                                <div class="promotion-value">+{{ promotion.bonus_points }}</div>
+                                <div style="opacity: 0.9;">Bonus Points</div>
+                            {% endif %}
+                        </div>
+                        
+                        <!-- Promotion Details -->
+                        <div class="promotion-details">
+                            <div class="promotion-description">{{ promotion.description }}</div>
+                            
+                            <!-- Eligibility Requirements -->
+                            <div class="eligibility-requirements">
+                                <h6 class="mb-2"><i class="fas fa-info-circle me-2"></i>Requirements</h6>
+                                
+                                {% if promotion.eligible_tiers.exists %}
+                                    <div class="requirement-item">
+                                        <i class="fas fa-crown requirement-icon"></i>
+                                        <span>Requires 
+                                            {% for tier in promotion.eligible_tiers.all %}
+                                                {{ tier.name }}{% if not forloop.last %}, {% endif %}
+                                            {% endfor %} tier
+                                        </span>
+                                    </div>
+                                {% endif %}
+                                
+                                {% if promotion.minimum_spending > 0 %}
+                                    <div class="requirement-item">
+                                        <i class="fas fa-dollar-sign requirement-icon"></i>
+                                        <span>Minimum spending: ${{ promotion.minimum_spending|floatformat:0 }}</span>
+                                    </div>
+                                {% endif %}
+                                
+                                <!-- Why not eligible -->
+                                {% if membership.tier not in promotion.eligible_tiers.all and promotion.eligible_tiers.exists %}
+                                    <div class="requirement-item">
+                                        <i class="fas fa-times-circle requirement-icon text-danger"></i>
+                                        <span class="text-danger">Your {{ membership.tier.name }} tier is not eligible</span>
+                                    </div>
+                                {% endif %}
+                            </div>
+                            
+                            <!-- Validity -->
+                            <div class="validity-info">
+                                <div><i class="fas fa-clock me-2"></i>Valid until {{ promotion.valid_until|date:"M d, Y" }}</div>
+                            </div>
+                            
+                            <!-- Action -->
+                            <div class="d-grid">
+                                {% if membership.tier in promotion.eligible_tiers.all or not promotion.eligible_tiers.exists %}
+                                    <a href="{% url 'bookings:search' %}" class="btn btn-outline-primary">
+                                        <i class="fas fa-plane me-2"></i>Book Flight & Earn
+                                    </a>
+                                {% else %}
+                                    <a href="{% url 'loyalty:tier_benefits' %}" class="btn btn-outline-secondary">
+                                        <i class="fas fa-arrow-up me-2"></i>Upgrade Tier
+                                    </a>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    <!-- Empty State -->
+    {% if not eligible_promotions and not other_promotions %}
+        <div class="empty-state">
+            <i class="fas fa-tags fa-3x mb-3"></i>
+            <h4>No Active Promotions</h4>
+            <p>There are currently no active promotions available. Check back soon for exciting offers!</p>
+            
+            <div class="mt-3">
+                <a href="{% url 'loyalty:rewards_catalog' %}" class="btn btn-primary me-2">
+                    Browse Rewards
+                </a>
+                <a href="{% url 'loyalty:dashboard' %}" class="btn btn-outline-secondary">
+                    Back to Dashboard
+                </a>
+            </div>
+        </div>
+    {% endif %}
+
+    <!-- How Promotions Work -->
+    {% if eligible_promotions or other_promotions %}
+        <div class="card mt-5">
+            <div class="card-body">
+                <h4 class="mb-4">How Promotions Work</h4>
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="text-center mb-4">
+                            <i class="fas fa-ticket-alt fa-3x text-primary mb-3"></i>
+                            <h5>Check Eligibility</h5>
+                            <p class="text-muted">Make sure you meet the promotion requirements like tier level or minimum spending.</p>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="text-center mb-4">
+                            <i class="fas fa-plane fa-3x text-success mb-3"></i>
+                            <h5>Book & Travel</h5>
+                            <p class="text-muted">Book and complete qualifying flights during the promotion period.</p>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="text-center mb-4">
+                            <i class="fas fa-coins fa-3x text-warning mb-3"></i>
+                            <h5>Earn Bonus Points</h5>
+                            <p class="text-muted">Receive your bonus points automatically within 2-3 business days after travel.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+
+    <!-- Quick Actions -->
+    <div class="card mt-4">
+        <div class="card-body">
+            <h5>Quick Actions</h5>
+            <div class="row">
+                <div class="col-md-3 mb-2">
+                    <a href="{% url 'bookings:search' %}" class="btn btn-primary w-100">
+                        <i class="fas fa-search me-2"></i>Search Flights
+                    </a>
+                </div>
+                <div class="col-md-3 mb-2">
+                    <a href="{% url 'loyalty:rewards_catalog' %}" class="btn btn-outline-primary w-100">
+                        <i class="fas fa-gift me-2"></i>Browse Rewards
+                    </a>
+                </div>
+                <div class="col-md-3 mb-2">
+                    <a href="{% url 'loyalty:tier_benefits' %}" class="btn btn-outline-success w-100">
+                        <i class="fas fa-crown me-2"></i>Tier Benefits
+                    </a>
+                </div>
+                <div class="col-md-3 mb-2">
+                    <a href="{% url 'loyalty:dashboard' %}" class="btn btn-outline-secondary w-100">
+                        <i class="fas fa-tachometer-alt me-2"></i>Dashboard
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Countdown timer for promotions
+function updateCountdowns() {
+    const timers = document.querySelectorAll('.countdown-timer');
+    
+    timers.forEach(function(timer) {
+        const endDate = new Date(timer.getAttribute('data-end-date'));
+        const now = new Date();
+        const timeLeft = endDate - now;
+        
+        if (timeLeft > 0) {
+            const days = Math.floor(timeLeft / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((timeLeft % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutes = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
+            
+            let timeString = '';
+            if (days > 0) {
+                timeString = `${days}d ${hours}h ${minutes}m remaining`;
+            } else if (hours > 0) {
+                timeString = `${hours}h ${minutes}m remaining`;
+            } else if (minutes > 0) {
+                timeString = `${minutes} minutes remaining`;
+            } else {
+                timeString = 'Ending soon!';
+            }
+            
+            timer.textContent = timeString;
+            
+            // Add urgency styling if less than 24 hours left
+            if (timeLeft < 24 * 60 * 60 * 1000) {
+                timer.style.color = '#e74c3c';
+                timer.style.fontWeight = 'bold';
+            }
+        } else {
+            timer.textContent = 'Promotion ended';
+            timer.style.color = '#95a5a6';
+        }
+    });
+}
+
+// Update countdowns every minute
+updateCountdowns();
+setInterval(updateCountdowns, 60000);
+
+// Animate usage progress bars on page load
+document.addEventListener('DOMContentLoaded', function() {
+    const progressBars = document.querySelectorAll('.usage-fill');
+    
+    setTimeout(function() {
+        progressBars.forEach(function(bar) {
+            const width = bar.style.width;
+            bar.style.width = '0%';
+            setTimeout(function() {
+                bar.style.width = width;
+            }, 100);
+        });
+    }, 500);
+});
+
+// Add hover effects for promotion cards
+document.querySelectorAll('.promotion-card').forEach(function(card) {
+    card.addEventListener('mouseenter', function() {
+        this.style.transform = 'translateY(-10px) scale(1.02)';
+    });
+    
+    card.addEventListener('mouseleave', function() {
+        this.style.transform = 'translateY(0) scale(1)';
+    });
+});
+</script>
+{% endblock %}

@@ -1,0 +1,172 @@
+{% extends 'base.html' %}
+
+{% block title %}Travel Packages - Novaryo{% endblock %}
+
+{% block content %}
+<div class="container-fluid p-0">
+    <!-- Hero Section -->
+    <section class="hero-section text-center" style="background: linear-gradient(135deg, var(--novaryo-primary) 0%, var(--novaryo-secondary) 100%); padding: 100px 0;">
+        <div class="container">
+            <h1 class="display-4 fw-bold mb-3">Travel Packages</h1>
+            <p class="lead mb-4">Discover amazing travel packages combining flights, hotels, and experiences</p>
+            
+            <!-- Package Search Form -->
+            <div class="search-form mx-auto" style="max-width: 800px;">
+                <form class="row g-3">
+                    <div class="col-md-6">
+                        <label for="destination" class="form-label text-start d-block">Destination</label>
+                        <input type="text" class="form-control" id="destination" placeholder="Where do you want to go?">
+                    </div>
+                    <div class="col-md-3">
+                        <label for="departure" class="form-label text-start d-block">Departure Date</label>
+                        <input type="date" class="form-control" id="departure">
+                    </div>
+                    <div class="col-md-3">
+                        <label for="duration" class="form-label text-start d-block">Duration</label>
+                        <select class="form-select" id="duration">
+                            <option value="">Select Duration</option>
+                            <option value="3">3 Days</option>
+                            <option value="5">5 Days</option>
+                            <option value="7">7 Days</option>
+                            <option value="10">10 Days</option>
+                            <option value="14">14 Days</option>
+                        </select>
+                    </div>
+                    <div class="col-12">
+                        <button type="submit" class="btn btn-primary btn-lg px-5">
+                            <i class="bi bi-search me-2"></i>Search Packages
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </section>
+
+    <!-- Featured Packages -->
+    <section class="py-5">
+        <div class="container">
+            <div class="text-center mb-5">
+                <h2 class="text-primary fw-bold">Featured Travel Packages</h2>
+                <p class="lead">Handpicked packages for unforgettable experiences</p>
+            </div>
+
+            <div class="row g-4">
+                <!-- Package Card 1 -->
+                <div class="col-lg-4 col-md-6">
+                    <div class="card hotel-card h-100">
+                        <img src="https://images.unsplash.com/photo-1506905925346-21bda4d32df4?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80" class="card-img-top" alt="Paris Package" style="height: 250px; object-fit: cover;">
+                        <div class="card-body">
+                            <h5 class="card-title">Paris Romance Package</h5>
+                            <p class="card-text text-muted mb-2">7 Days • 2 Adults</p>
+                            <p class="card-text">Explore the City of Love with flights, luxury hotel, and romantic experiences included.</p>
+                            <div class="d-flex align-items-center justify-content-between">
+                                <div>
+                                    <span class="h4 text-primary fw-bold">$2,499</span>
+                                    <small class="text-muted">per person</small>
+                                </div>
+                                <div class="star-rating">
+                                    <i class="bi bi-star-fill"></i>
+                                    <i class="bi bi-star-fill"></i>
+                                    <i class="bi bi-star-fill"></i>
+                                    <i class="bi bi-star-fill"></i>
+                                    <i class="bi bi-star-half"></i>
+                                    <small class="ms-1">4.8</small>
+                                </div>
+                            </div>
+                            <div class="mt-3">
+                                <span class="badge bg-primary me-1">Flight Included</span>
+                                <span class="badge bg-success me-1">5-Star Hotel</span>
+                                <span class="badge bg-warning">Tours Included</span>
+                            </div>
+                        </div>
+                        <div class="card-footer bg-white border-0">
+                            <button class="btn btn-primary w-100">View Package Details</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Package Card 2 -->
+                <div class="col-lg-4 col-md-6">
+                    <div class="card hotel-card h-100">
+                        <img src="https://images.unsplash.com/photo-1506197603052-3cc9c3a201bd?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80" class="card-img-top" alt="Bali Package" style="height: 250px; object-fit: cover;">
+                        <div class="card-body">
+                            <h5 class="card-title">Bali Adventure Package</h5>
+                            <p class="card-text text-muted mb-2">10 Days • 2 Adults</p>
+                            <p class="card-text">Island paradise with cultural tours, water sports, and luxury beachfront resort.</p>
+                            <div class="d-flex align-items-center justify-content-between">
+                                <div>
+                                    <span class="h4 text-primary fw-bold">$1,899</span>
+                                    <small class="text-muted">per person</small>
+                                </div>
+                                <div class="star-rating">
+                                    <i class="bi bi-star-fill"></i>
+                                    <i class="bi bi-star-fill"></i>
+                                    <i class="bi bi-star-fill"></i>
+                                    <i class="bi bi-star-fill"></i>
+                                    <i class="bi bi-star"></i>
+                                    <small class="ms-1">4.6</small>
+                                </div>
+                            </div>
+                            <div class="mt-3">
+                                <span class="badge bg-primary me-1">Flight Included</span>
+                                <span class="badge bg-success me-1">Beach Resort</span>
+                                <span class="badge bg-warning">Activities</span>
+                            </div>
+                        </div>
+                        <div class="card-footer bg-white border-0">
+                            <button class="btn btn-primary w-100">View Package Details</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Package Card 3 -->
+                <div class="col-lg-4 col-md-6">
+                    <div class="card hotel-card h-100">
+                        <img src="https://images.unsplash.com/photo-1539650116574-75c0c6d73f6e?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80" class="card-img-top" alt="Japan Package" style="height: 250px; object-fit: cover;">
+                        <div class="card-body">
+                            <h5 class="card-title">Japan Discovery Package</h5>
+                            <p class="card-text text-muted mb-2">14 Days • 2 Adults</p>
+                            <p class="card-text">Experience traditional and modern Japan with guided tours and authentic experiences.</p>
+                            <div class="d-flex align-items-center justify-content-between">
+                                <div>
+                                    <span class="h4 text-primary fw-bold">$3,299</span>
+                                    <small class="text-muted">per person</small>
+                                </div>
+                                <div class="star-rating">
+                                    <i class="bi bi-star-fill"></i>
+                                    <i class="bi bi-star-fill"></i>
+                                    <i class="bi bi-star-fill"></i>
+                                    <i class="bi bi-star-fill"></i>
+                                    <i class="bi bi-star-fill"></i>
+                                    <small class="ms-1">4.9</small>
+                                </div>
+                            </div>
+                            <div class="mt-3">
+                                <span class="badge bg-primary me-1">Flight Included</span>
+                                <span class="badge bg-success me-1">Premium Hotels</span>
+                                <span class="badge bg-warning">Cultural Tours</span>
+                            </div>
+                        </div>
+                        <div class="card-footer bg-white border-0">
+                            <button class="btn btn-primary w-100">View Package Details</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Coming Soon Notice -->
+            <div class="row mt-5">
+                <div class="col-12">
+                    <div class="card bg-light text-center">
+                        <div class="card-body p-4">
+                            <i class="bi bi-tools text-primary mb-3" style="font-size: 3rem;"></i>
+                            <h4 class="text-primary">Package Booking Coming Soon</h4>
+                            <p class="lead mb-0">We're working hard to bring you the best travel package booking experience. Stay tuned!</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
+{% endblock %}

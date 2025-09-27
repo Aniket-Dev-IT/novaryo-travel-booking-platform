@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payment Receipt - {{ booking.booking_reference }}</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background-color: #f8f9fa;
+            margin: 0;
+            padding: 0;
+        }
+        .email-container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+        .header {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            color: white;
+            padding: 30px 20px;
+            text-align: center;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 24px;
+            font-weight: 300;
+        }
+        .content {
+            padding: 30px 20px;
+        }
+        .receipt-box {
+            background-color: #d1ecf1;
+            border: 1px solid #bee5eb;
+            border-radius: 6px;
+            padding: 20px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        .payment-info {
+            background-color: #f8f9fa;
+            border-radius: 6px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        .amount {
+            font-size: 28px;
+            font-weight: bold;
+            color: #28a745;
+            margin: 15px 0;
+        }
+        .footer {
+            background-color: #495057;
+            color: white;
+            padding: 20px;
+            text-align: center;
+            font-size: 14px;
+        }
+        .footer a {
+            color: #adb5bd;
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="email-container">
+        <div class="header">
+            <h1>💳 Payment Receipt</h1>
+            <p>Transaction Confirmation</p>
+        </div>
+        
+        <div class="content">
+            <div class="receipt-box">
+                <h2>✅ Payment Successful!</h2>
+                <p>Thank you for your payment</p>
+                <div class="amount">${{ payment.amount }} {{ booking.currency }}</div>
+            </div>
+            
+            <div class="payment-info">
+                <h3>Payment Details</h3>
+                <p><strong>Booking Reference:</strong> {{ booking.booking_reference }}</p>
+                <p><strong>Transaction ID:</strong> {{ payment.transaction_id|default:"N/A" }}</p>
+                <p><strong>Payment Method:</strong> {{ payment.get_payment_method_display }}</p>
+                <p><strong>Payment Status:</strong> {{ payment.get_status_display }}</p>
+                <p><strong>Transaction Date:</strong> {{ payment.processed_at|date:"M d, Y g:i A" }}</p>
+                {% if payment.card_last_four %}
+                <p><strong>Card:</strong> **** **** **** {{ payment.card_last_four }}</p>
+                {% endif %}
+            </div>
+            
+            <div class="payment-info">
+                <h3>Flight Information</h3>
+                <p><strong>Flight:</strong> {{ booking.flight.flight_number }}</p>
+                <p><strong>Route:</strong> {{ booking.flight.origin }} → {{ booking.flight.destination }}</p>
+                <p><strong>Departure:</strong> {{ booking.flight.departure_time|date:"M d, Y g:i A" }}</p>
+                <p><strong>Class:</strong> {{ booking.get_cabin_class_display }}</p>
+            </div>
+            
+            <div style="text-align: center; margin: 30px 0;">
+                <p>This receipt serves as proof of payment.</p>
+                <p>If you have any questions, contact our support team at <a href="mailto:{{ support_email }}">{{ support_email }}</a></p>
+            </div>
+        </div>
+        
+        <div class="footer">
+            <p>&copy; {{ year }} Novaryo. All rights reserved.</p>
+            <p>
+                <a href="mailto:{{ support_email }}">Support</a> • 
+                <a href="https://{{ site.domain }}">{{ site.name }}</a>
+            </p>
+        </div>
+    </div>
+</body>
+</html>

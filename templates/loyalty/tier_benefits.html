@@ -1,0 +1,431 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Tier Benefits - {{ block.super }}{% endblock %}
+
+{% block extra_css %}
+<style>
+.tier-card {
+    border: none;
+    border-radius: 15px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    height: 100%;
+    overflow: hidden;
+    position: relative;
+}
+
+.tier-card:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 8px 30px rgba(0,0,0,0.15);
+}
+
+.tier-card.current-tier {
+    border: 3px solid #28a745;
+    box-shadow: 0 4px 20px rgba(40, 167, 69, 0.3);
+}
+
+.tier-card.current-tier::before {
+    content: "Your Current Tier";
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: #28a745;
+    color: white;
+    padding: 0.25rem 0.75rem;
+    border-radius: 15px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    z-index: 10;
+}
+
+.tier-header {
+    padding: 2rem 1.5rem 1rem;
+    text-align: center;
+    background: linear-gradient(135deg, var(--tier-color-start) 0%, var(--tier-color-end) 100%);
+    color: white;
+    position: relative;
+}
+
+.tier-name {
+    font-size: 1.5rem;
+    font-weight: bold;
+    margin-bottom: 0.5rem;
+}
+
+.tier-multiplier {
+    font-size: 2rem;
+    font-weight: bold;
+    margin-bottom: 0.25rem;
+}
+
+.tier-requirements {
+    background: rgba(255,255,255,0.1);
+    border-radius: 10px;
+    padding: 1rem;
+    margin-top: 1rem;
+}
+
+.tier-requirements h6 {
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+}
+
+.requirement-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.25rem;
+    font-size: 0.875rem;
+}
+
+.tier-benefits {
+    padding: 1.5rem;
+}
+
+.benefit-item {
+    display: flex;
+    align-items: center;
+    padding: 0.75rem 0;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.benefit-item:last-child {
+    border-bottom: none;
+}
+
+.benefit-icon {
+    width: 20px;
+    margin-right: 1rem;
+    color: #28a745;
+}
+
+.benefit-text {
+    flex-grow: 1;
+}
+
+.benefit-value {
+    font-weight: 600;
+    color: #495057;
+}
+
+.progress-section {
+    background: #f8f9fa;
+    border-radius: 15px;
+    padding: 2rem;
+    margin-bottom: 2rem;
+}
+
+.progress-item {
+    margin-bottom: 1.5rem;
+}
+
+.progress-item:last-child {
+    margin-bottom: 0;
+}
+
+.progress-label {
+    display: flex;
+    justify-content-between;
+    align-items: center;
+    margin-bottom: 0.5rem;
+}
+
+.progress-bar-custom {
+    height: 10px;
+    border-radius: 5px;
+    background: #e9ecef;
+    overflow: hidden;
+}
+
+.progress-fill {
+    height: 100%;
+    border-radius: 5px;
+    transition: width 0.3s ease;
+}
+
+.breadcrumb-custom {
+    background: transparent;
+    padding: 0;
+    margin-bottom: 2rem;
+}
+
+/* Tier color schemes */
+.bronze {
+    --tier-color-start: #cd7f32;
+    --tier-color-end: #a0522d;
+}
+
+.silver {
+    --tier-color-start: #c0c0c0;
+    --tier-color-end: #808080;
+}
+
+.gold {
+    --tier-color-start: #ffd700;
+    --tier-color-end: #daa520;
+}
+
+.platinum {
+    --tier-color-start: #e5e4e2;
+    --tier-color-end: #b8860b;
+}
+
+.diamond {
+    --tier-color-start: #b9f2ff;
+    --tier-color-end: #1e90ff;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <!-- Breadcrumb -->
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb breadcrumb-custom">
+            <li class="breadcrumb-item"><a href="{% url 'loyalty:dashboard' %}">Loyalty</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Tier Benefits</li>
+        </ol>
+    </nav>
+
+    <!-- Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="text-center">
+                <h1 class="h2 mb-2">Loyalty Tier Benefits</h1>
+                <p class="text-muted mb-0">Discover the exclusive benefits and requirements for each tier</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Current Status -->
+    <div class="progress-section">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <h4>Your Current Status</h4>
+                <p class="text-muted mb-3">
+                    You are currently a <strong style="color: {{ current_tier.color_code }};">{{ current_tier.name }}</strong> member 
+                    with <strong>{{ membership.points_balance|floatformat:0 }}</strong> points available.
+                </p>
+                
+                {% if current_tier.next_tier %}
+                    <div class="progress-item">
+                        <div class="progress-label">
+                            <span>Progress to {{ current_tier.next_tier.name }}</span>
+                            <span class="text-muted">{{ membership.annual_spending|floatformat:0 }} / ${{ current_tier.next_tier.min_spending|floatformat:0 }}</span>
+                        </div>
+                        <div class="progress-bar-custom">
+                            <div class="progress-fill bg-success" style="width: {% widthratio membership.annual_spending current_tier.next_tier.min_spending 100 %}%;"></div>
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
+            <div class="col-md-4 text-center">
+                <div class="h3 mb-1" style="color: {{ current_tier.color_code }};">{{ current_tier.name }}</div>
+                <div class="text-muted">Current Tier</div>
+                <div class="mt-2">
+                    <span class="badge" style="background-color: {{ current_tier.color_code }};">{{ current_tier.points_multiplier }}x Points</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tier Cards -->
+    <div class="row">
+        {% for tier in tiers %}
+            <div class="col-lg-6 col-xl-4 mb-4">
+                <div class="tier-card {% if tier == current_tier %}current-tier{% endif %} {% cycle 'bronze' 'silver' 'gold' 'platinum' 'diamond' %}">
+                    <!-- Tier Header -->
+                    <div class="tier-header">
+                        <div class="tier-name">{{ tier.name }}</div>
+                        <div class="tier-multiplier">{{ tier.points_multiplier }}x</div>
+                        <div style="opacity: 0.8;">Points Multiplier</div>
+                        
+                        <!-- Requirements -->
+                        {% if tier.order > 0 %}
+                            <div class="tier-requirements">
+                                <h6>Requirements</h6>
+                                {% if tier.min_spending > 0 %}
+                                    <div class="requirement-item">
+                                        <span>Annual Spending:</span>
+                                        <strong>${{ tier.min_spending|floatformat:0 }}</strong>
+                                    </div>
+                                {% endif %}
+                                {% if tier.min_flights > 0 %}
+                                    <div class="requirement-item">
+                                        <span>Annual Flights:</span>
+                                        <strong>{{ tier.min_flights }}</strong>
+                                    </div>
+                                {% endif %}
+                                {% if tier.min_points > 0 %}
+                                    <div class="requirement-item">
+                                        <span>Lifetime Points:</span>
+                                        <strong>{{ tier.min_points|floatformat:0 }}</strong>
+                                    </div>
+                                {% endif %}
+                            </div>
+                        {% else %}
+                            <div class="tier-requirements">
+                                <h6>Entry Level</h6>
+                                <div style="opacity: 0.8;">No requirements - join today!</div>
+                            </div>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Benefits -->
+                    <div class="tier-benefits">
+                        <h6 class="mb-3">Benefits & Privileges</h6>
+                        
+                        <!-- Points Multiplier -->
+                        <div class="benefit-item">
+                            <i class="fas fa-coins benefit-icon"></i>
+                            <div class="benefit-text">Points Earning</div>
+                            <div class="benefit-value">{{ tier.points_multiplier }}x multiplier</div>
+                        </div>
+                        
+                        <!-- Priority Boarding -->
+                        <div class="benefit-item">
+                            <i class="fas {% if tier.priority_boarding %}fa-check text-success{% else %}fa-times text-muted{% endif %} benefit-icon"></i>
+                            <div class="benefit-text">Priority Boarding</div>
+                            <div class="benefit-value">{% if tier.priority_boarding %}Included{% else %}Not included{% endif %}</div>
+                        </div>
+                        
+                        <!-- Baggage Allowance -->
+                        <div class="benefit-item">
+                            <i class="fas fa-suitcase benefit-icon"></i>
+                            <div class="benefit-text">Extra Baggage</div>
+                            <div class="benefit-value">+{{ tier.free_baggage_allowance }}kg</div>
+                        </div>
+                        
+                        <!-- Lounge Access -->
+                        <div class="benefit-item">
+                            <i class="fas {% if tier.lounge_access %}fa-check text-success{% else %}fa-times text-muted{% endif %} benefit-icon"></i>
+                            <div class="benefit-text">Lounge Access</div>
+                            <div class="benefit-value">{% if tier.lounge_access %}Included{% else %}Not included{% endif %}</div>
+                        </div>
+                        
+                        <!-- Free Seat Selection -->
+                        <div class="benefit-item">
+                            <i class="fas {% if tier.free_seat_selection %}fa-check text-success{% else %}fa-times text-muted{% endif %} benefit-icon"></i>
+                            <div class="benefit-text">Free Seat Selection</div>
+                            <div class="benefit-value">{% if tier.free_seat_selection %}Included{% else %}Not included{% endif %}</div>
+                        </div>
+                        
+                        <!-- Upgrade Priority -->
+                        {% if tier.upgrade_priority > 0 %}
+                            <div class="benefit-item">
+                                <i class="fas fa-arrow-up benefit-icon"></i>
+                                <div class="benefit-text">Upgrade Priority</div>
+                                <div class="benefit-value">Level {{ tier.upgrade_priority }}</div>
+                            </div>
+                        {% endif %}
+                        
+                        <!-- Additional Benefits by Tier -->
+                        {% if tier.name == 'Gold' or tier.name == 'Platinum' %}
+                            <div class="benefit-item">
+                                <i class="fas fa-phone benefit-icon"></i>
+                                <div class="benefit-text">Priority Customer Service</div>
+                                <div class="benefit-value">24/7 dedicated line</div>
+                            </div>
+                        {% endif %}
+                        
+                        {% if tier.name == 'Platinum' %}
+                            <div class="benefit-item">
+                                <i class="fas fa-gift benefit-icon"></i>
+                                <div class="benefit-text">Exclusive Rewards</div>
+                                <div class="benefit-value">Platinum-only offers</div>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+
+    <!-- How to Earn Points -->
+    <div class="card mt-5">
+        <div class="card-body">
+            <h4 class="mb-4">How to Earn Points</h4>
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="text-center mb-4">
+                        <i class="fas fa-plane fa-3x text-primary mb-3"></i>
+                        <h5>Book Flights</h5>
+                        <p class="text-muted">Earn 1 point per $1 spent on flights, multiplied by your tier bonus.</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="text-center mb-4">
+                        <i class="fas fa-credit-card fa-3x text-success mb-3"></i>
+                        <h5>Partner Purchases</h5>
+                        <p class="text-muted">Earn points when you shop with our partner merchants and services.</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="text-center mb-4">
+                        <i class="fas fa-star fa-3x text-warning mb-3"></i>
+                        <h5>Promotions</h5>
+                        <p class="text-muted">Take advantage of special promotions and bonus point opportunities.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="card mt-4">
+        <div class="card-body">
+            <h5>Quick Actions</h5>
+            <div class="row">
+                <div class="col-md-3 mb-2">
+                    <a href="{% url 'loyalty:rewards_catalog' %}" class="btn btn-primary w-100">
+                        <i class="fas fa-gift me-2"></i>Browse Rewards
+                    </a>
+                </div>
+                <div class="col-md-3 mb-2">
+                    <a href="{% url 'loyalty:points_history' %}" class="btn btn-outline-info w-100">
+                        <i class="fas fa-history me-2"></i>Points History
+                    </a>
+                </div>
+                <div class="col-md-3 mb-2">
+                    <a href="{% url 'loyalty:promotions' %}" class="btn btn-outline-success w-100">
+                        <i class="fas fa-tags me-2"></i>Current Promotions
+                    </a>
+                </div>
+                <div class="col-md-3 mb-2">
+                    <a href="{% url 'loyalty:dashboard' %}" class="btn btn-outline-secondary w-100">
+                        <i class="fas fa-tachometer-alt me-2"></i>Dashboard
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Animate progress bars on page load
+document.addEventListener('DOMContentLoaded', function() {
+    const progressBars = document.querySelectorAll('.progress-fill');
+    progressBars.forEach(function(bar) {
+        const width = bar.style.width;
+        bar.style.width = '0%';
+        setTimeout(function() {
+            bar.style.width = width;
+        }, 500);
+    });
+});
+
+// Add hover effects for tier cards
+document.querySelectorAll('.tier-card').forEach(function(card) {
+    card.addEventListener('mouseenter', function() {
+        this.style.transform = 'translateY(-10px) scale(1.02)';
+    });
+    
+    card.addEventListener('mouseleave', function() {
+        this.style.transform = 'translateY(0) scale(1)';
+    });
+});
+</script>
+{% endblock %}

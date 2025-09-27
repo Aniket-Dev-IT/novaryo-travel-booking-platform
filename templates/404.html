@@ -1,0 +1,69 @@
+{% extends 'base.html' %}
+
+{% block title %}Page Not Found - Novaryo{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center min-vh-100 align-items-center">
+        <div class="col-lg-6 col-md-8 text-center">
+            <div class="error-page">
+                <!-- Error Icon -->
+                <div class="mb-4">
+                    <i class="bi bi-compass text-primary" style="font-size: 6rem;"></i>
+                </div>
+                
+                <!-- Error Message -->
+                <h1 class="display-1 fw-bold text-primary mb-3">404</h1>
+                <h2 class="mb-3">Page Not Found</h2>
+                <p class="lead mb-4">Looks like you've wandered off the beaten path. The page you're looking for doesn't exist.</p>
+                
+                <!-- Search Suggestion -->
+                <div class="mb-4">
+                    <p class="text-muted mb-3">Maybe you were looking for:</p>
+                    <div class="d-flex flex-wrap justify-content-center gap-2">
+                        <a href="{% url 'home' %}" class="btn btn-outline-primary btn-sm">Home</a>
+                        <a href="{% url 'hotels:search' %}" class="btn btn-outline-primary btn-sm">Find Hotels</a>
+                        <a href="{% url 'loyalty:dashboard' %}" class="btn btn-outline-primary btn-sm">Loyalty Program</a>
+                        <a href="{% url 'contact' %}" class="btn btn-outline-primary btn-sm">Contact Us</a>
+                    </div>
+                </div>
+                
+                <!-- Main Action -->
+                <div class="mb-5">
+                    <a href="{% url 'home' %}" class="btn btn-primary btn-lg">
+                        <i class="bi bi-house me-2"></i>Back to Home
+                    </a>
+                </div>
+                
+                <!-- Help Section -->
+                <div class="card bg-light">
+                    <div class="card-body p-4">
+                        <h5 class="text-primary mb-3">Need Help?</h5>
+                        <p class="mb-3">If you think this is a mistake, please let us know:</p>
+                        <div class="d-flex justify-content-center gap-3">
+                            <a href="{% url 'contact' %}" class="text-decoration-none">
+                                <i class="bi bi-envelope me-1"></i> Contact Support
+                            </a>
+                            <span class="text-muted">•</span>
+                            <a href="tel:+15551234567" class="text-decoration-none">
+                                <i class="bi bi-telephone me-1"></i> Call Us
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.error-page {
+    animation: fadeIn 0.5s ease-in;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+</style>
+{% endblock %}

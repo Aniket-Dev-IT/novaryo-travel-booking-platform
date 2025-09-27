@@ -1,0 +1,289 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Flight Search - Novaryo{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <!-- Flight Search Form -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h3 class="card-title mb-4">
+                        <i class="bi bi-airplane me-2"></i>Find Your Perfect Flight
+                    </h3>
+                    
+                    <form method="get" id="flight-search-form">
+                        <div class="row mb-3">
+                            <div class="col-12">
+                                <div class="btn-group" role="group" aria-label="Trip type">
+                                    <input type="radio" class="btn-check" name="trip_type" id="roundtrip" value="roundtrip" checked>
+                                    <label class="btn btn-outline-primary" for="roundtrip">Round Trip</label>
+                                    
+                                    <input type="radio" class="btn-check" name="trip_type" id="oneway" value="oneway">
+                                    <label class="btn btn-outline-primary" for="oneway">One Way</label>
+                                    
+                                    <input type="radio" class="btn-check" name="trip_type" id="multicity" value="multicity">
+                                    <label class="btn btn-outline-primary" for="multicity">Multi-City</label>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row g-3">
+                            <div class="col-md-3">
+                                <label for="origin" class="form-label">From</label>
+                                <input type="text" class="form-control" name="origin" id="origin"
+                                       placeholder="Departure city or airport" 
+                                       value="{{ request.GET.origin }}">
+                            </div>
+                            
+                            <div class="col-md-3">
+                                <label for="destination" class="form-label">To</label>
+                                <input type="text" class="form-control" name="destination" id="destination"
+                                       placeholder="Arrival city or airport" 
+                                       value="{{ request.GET.destination }}">
+                            </div>
+                            
+                            <div class="col-md-2">
+                                <label for="departure_date" class="form-label">Departure</label>
+                                <input type="date" class="form-control" name="departure_date" id="departure_date"
+                                       value="{{ request.GET.departure_date }}">
+                            </div>
+                            
+                            <div class="col-md-2" id="return-date-col">
+                                <label for="return_date" class="form-label">Return</label>
+                                <input type="date" class="form-control" name="return_date" id="return_date"
+                                       value="{{ request.GET.return_date }}">
+                            </div>
+                            
+                            <div class="col-md-2">
+                                <label for="passengers" class="form-label">Passengers</label>
+                                <select class="form-select" name="passengers" id="passengers">
+                                    <option value="1" {% if request.GET.passengers == '1' or not request.GET.passengers %}selected{% endif %}>1 Passenger</option>
+                                    <option value="2" {% if request.GET.passengers == '2' %}selected{% endif %}>2 Passengers</option>
+                                    <option value="3" {% if request.GET.passengers == '3' %}selected{% endif %}>3 Passengers</option>
+                                    <option value="4" {% if request.GET.passengers == '4' %}selected{% endif %}>4 Passengers</option>
+                                    <option value="5" {% if request.GET.passengers == '5' %}selected{% endif %}>5+ Passengers</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="row mt-3">
+                            <div class="col-md-3">
+                                <label for="cabin_class" class="form-label">Cabin Class</label>
+                                <select class="form-select" name="cabin_class" id="cabin_class">
+                                    <option value="economy" {% if request.GET.cabin_class == 'economy' or not request.GET.cabin_class %}selected{% endif %}>Economy</option>
+                                    <option value="premium_economy" {% if request.GET.cabin_class == 'premium_economy' %}selected{% endif %}>Premium Economy</option>
+                                    <option value="business" {% if request.GET.cabin_class == 'business' %}selected{% endif %}>Business</option>
+                                    <option value="first" {% if request.GET.cabin_class == 'first' %}selected{% endif %}>First</option>
+                                </select>
+                            </div>
+                            
+                            <div class="col-md-3">
+                                <div class="form-check mt-4">
+                                    <input class="form-check-input" type="checkbox" name="direct_flights" id="direct_flights"
+                                           {% if request.GET.direct_flights %}checked{% endif %}>
+                                    <label class="form-check-label" for="direct_flights">
+                                        Direct flights only
+                                    </label>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-6 d-flex align-items-end">
+                                <button type="submit" class="btn btn-primary btn-lg w-100">
+                                    <i class="bi bi-search me-2"></i>Search Flights
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Search Results -->
+    {% if flights %}
+        <div class="row">
+            <div class="col-12">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h4>{{ flights.count }} flight{% if flights.count != 1 %}s{% endif %} found</h4>
+                    <div class="dropdown">
+                        <button class="btn btn-outline-secondary dropdown-toggle" type="button" 
+                                data-bs-toggle="dropdown">
+                            Sort by: Price
+                        </button>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="?{{ request.GET.urlencode }}&sort=price_low">Price (Low to High)</a></li>
+                            <li><a class="dropdown-item" href="?{{ request.GET.urlencode }}&sort=price_high">Price (High to Low)</a></li>
+                            <li><a class="dropdown-item" href="?{{ request.GET.urlencode }}&sort=duration">Duration</a></li>
+                            <li><a class="dropdown-item" href="?{{ request.GET.urlencode }}&sort=departure">Departure Time</a></li>
+                        </ul>
+                    </div>
+                </div>
+                
+                {% for flight in flights %}
+                    <div class="card mb-3 flight-card">
+                        <div class="card-body">
+                            <div class="row align-items-center">
+                                <div class="col-md-2 text-center">
+                                    <img src="{% if flight.airline.logo %}{{ flight.airline.logo.url }}{% else %}{% static 'images/airline-placeholder.png' %}{% endif %}" 
+                                         alt="{{ flight.airline.name }}" 
+                                         class="img-fluid" style="max-height: 40px;">
+                                    <div class="small text-muted">{{ flight.airline.name }}</div>
+                                </div>
+                                
+                                <div class="col-md-6">
+                                    <div class="row">
+                                        <div class="col-4 text-center">
+                                            <div class="h5 mb-0">{{ flight.departure_time|time:"H:i" }}</div>
+                                            <div class="text-muted">{{ flight.departure_airport.code }}</div>
+                                            <div class="small text-muted">{{ flight.departure_airport.city }}</div>
+                                        </div>
+                                        <div class="col-4 text-center">
+                                            <div class="text-muted small">{{ flight.duration_display }}</div>
+                                            <div class="flight-path">
+                                                <span class="flight-line"></span>
+                                                <i class="bi bi-airplane-fill text-primary"></i>
+                                            </div>
+                                            {% if flight.stops > 0 %}
+                                                <div class="small text-muted">{{ flight.stops }} stop{% if flight.stops > 1 %}s{% endif %}</div>
+                                            {% else %}
+                                                <div class="small text-success">Direct</div>
+                                            {% endif %}
+                                        </div>
+                                        <div class="col-4 text-center">
+                                            <div class="h5 mb-0">{{ flight.arrival_time|time:"H:i" }}</div>
+                                            <div class="text-muted">{{ flight.arrival_airport.code }}</div>
+                                            <div class="small text-muted">{{ flight.arrival_airport.city }}</div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="col-md-2 text-center">
+                                    <div class="h4 text-primary mb-1">${{ flight.price|floatformat:0 }}</div>
+                                    <div class="small text-muted">per person</div>
+                                </div>
+                                
+                                <div class="col-md-2 text-end">
+                                    <button type="button" class="btn btn-outline-secondary btn-sm mb-2" 
+                                            title="Save Flight">
+                                        <i class="bi bi-heart"></i>
+                                    </button>
+                                    <br>
+                                    <button type="button" class="btn btn-primary" 
+                                            onclick="selectFlight({{ flight.id }})">
+                                        Select
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+                
+                <!-- Pagination -->
+                {% if is_paginated %}
+                    <nav aria-label="Flight search results pagination">
+                        <ul class="pagination justify-content-center">
+                            {% if page_obj.has_previous %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?{{ request.GET.urlencode }}&page={{ page_obj.previous_page_number }}">Previous</a>
+                                </li>
+                            {% endif %}
+                            
+                            {% for num in page_obj.paginator.page_range %}
+                                {% if page_obj.number == num %}
+                                    <li class="page-item active">
+                                        <span class="page-link">{{ num }}</span>
+                                    </li>
+                                {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                                    <li class="page-item">
+                                        <a class="page-link" href="?{{ request.GET.urlencode }}&page={{ num }}">{{ num }}</a>
+                                    </li>
+                                {% endif %}
+                            {% endfor %}
+                            
+                            {% if page_obj.has_next %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?{{ request.GET.urlencode }}&page={{ page_obj.next_page_number }}">Next</a>
+                                </li>
+                            {% endif %}
+                        </ul>
+                    </nav>
+                {% endif %}
+            </div>
+        </div>
+    {% else %}
+        <div class="text-center py-5">
+            <i class="bi bi-airplane display-1 text-muted mb-3"></i>
+            <h3>No flights found</h3>
+            <p class="text-muted">Try adjusting your search criteria or check different dates</p>
+            <a href="{% url 'home' %}" class="btn btn-primary">
+                <i class="bi bi-house me-2"></i>Back to Home
+            </a>
+        </div>
+    {% endif %}
+</div>
+
+<style>
+.flight-path {
+    position: relative;
+    margin: 10px 0;
+}
+
+.flight-line {
+    display: inline-block;
+    width: 60px;
+    height: 1px;
+    background-color: #dee2e6;
+    position: relative;
+    top: -2px;
+}
+
+.flight-card {
+    transition: box-shadow 0.2s ease;
+}
+
+.flight-card:hover {
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+}
+</style>
+
+<script>
+// Trip type functionality
+document.querySelectorAll('input[name="trip_type"]').forEach(function(radio) {
+    radio.addEventListener('change', function() {
+        const returnCol = document.getElementById('return-date-col');
+        const returnInput = document.getElementById('return_date');
+        
+        if (this.value === 'oneway') {
+            returnCol.style.display = 'none';
+            returnInput.removeAttribute('required');
+        } else {
+            returnCol.style.display = 'block';
+            if (this.value === 'roundtrip') {
+                returnInput.setAttribute('required', 'required');
+            }
+        }
+    });
+});
+
+// Set minimum dates
+document.getElementById('departure_date').min = new Date().toISOString().split('T')[0];
+
+// Update return date minimum when departure date changes
+document.getElementById('departure_date').addEventListener('change', function() {
+    const departureDate = new Date(this.value);
+    const returnInput = document.getElementById('return_date');
+    const minReturnDate = new Date(departureDate);
+    minReturnDate.setDate(minReturnDate.getDate() + 1);
+    returnInput.min = minReturnDate.toISOString().split('T')[0];
+});
+
+// Flight selection function
+function selectFlight(flightId) {
+    // This would typically redirect to booking page
+    alert('Flight selection functionality would redirect to booking page for flight ID: ' + flightId);
+}
+</script>
+{% endblock %}

@@ -1,0 +1,297 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Loyalty Dashboard - {{ block.super }}{% endblock %}
+
+{% block extra_css %}
+<style>
+.tier-badge {
+    display: inline-block;
+    padding: 0.25rem 0.75rem;
+    border-radius: 50px;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: white;
+}
+
+.tier-progress-bar {
+    height: 8px;
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.progress-segment {
+    height: 100%;
+    transition: width 0.3s ease;
+}
+
+.stat-card {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 15px;
+    padding: 1.5rem;
+    color: white;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+}
+
+.stat-value {
+    font-size: 2rem;
+    font-weight: bold;
+    margin-bottom: 0.5rem;
+}
+
+.promotion-card {
+    border: 2px solid #e3f2fd;
+    border-radius: 10px;
+    padding: 1rem;
+    background: linear-gradient(135deg, #e3f2fd 0%, #f3e5f5 100%);
+    margin-bottom: 1rem;
+}
+
+.transaction-item {
+    border-left: 4px solid;
+    padding-left: 1rem;
+    margin-bottom: 1rem;
+}
+
+.transaction-earning { border-color: #4caf50; }
+.transaction-redemption { border-color: #f44336; }
+.transaction-bonus { border-color: #ff9800; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <!-- Header Section -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h1 class="h2 mb-1">Welcome back!</h1>
+                    <p class="text-muted mb-0">Member ID: <strong>{{ membership.member_id }}</strong></p>
+                </div>
+                <div class="text-end">
+                    <span class="tier-badge" style="background-color: {{ membership.tier.color_code }};">
+                        {{ membership.tier.name }}
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Statistics Cards -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="stat-card">
+                <div class="stat-value">{{ membership.points_balance|floatformat:0 }}</div>
+                <div class="stat-label">Available Points</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stat-card">
+                <div class="stat-value">{{ membership.lifetime_points|floatformat:0 }}</div>
+                <div class="stat-label">Lifetime Points</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stat-card">
+                <div class="stat-value">${{ membership.annual_spending|floatformat:0 }}</div>
+                <div class="stat-label">Annual Spending</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stat-card">
+                <div class="stat-value">{{ membership.annual_flights }}</div>
+                <div class="stat-label">Flights This Year</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tier Progress -->
+    {% if tier_progress %}
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Progress to {{ tier_progress.next_tier.name }}</h5>
+                    
+                    {% if tier_progress.can_upgrade %}
+                        <div class="alert alert-success" role="alert">
+                            <i class="fas fa-check-circle me-2"></i>
+                            Congratulations! You qualify for {{ tier_progress.next_tier.name }} tier upgrade!
+                        </div>
+                    {% else %}
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <div class="d-flex justify-content-between mb-1">
+                                        <small>Points</small>
+                                        <small>{{ tier_progress.points_needed|floatformat:0 }} needed</small>
+                                    </div>
+                                    <div class="tier-progress-bar bg-light">
+                                        <div class="progress-segment bg-primary" style="width: 75%;"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <div class="d-flex justify-content-between mb-1">
+                                        <small>Spending</small>
+                                        <small>${{ tier_progress.spending_needed|floatformat:0 }} needed</small>
+                                    </div>
+                                    <div class="tier-progress-bar bg-light">
+                                        <div class="progress-segment bg-success" style="width: 60%;"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <div class="d-flex justify-content-between mb-1">
+                                        <small>Flights</small>
+                                        <small>{{ tier_progress.flights_needed }} needed</small>
+                                    </div>
+                                    <div class="tier-progress-bar bg-light">
+                                        <div class="progress-segment bg-warning" style="width: 40%;"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <div class="row">
+        <!-- Main Content -->
+        <div class="col-lg-8">
+            <!-- Active Promotions -->
+            {% if eligible_promotions %}
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h5 class="card-title">Available Promotions</h5>
+                    {% for promotion in eligible_promotions %}
+                        <div class="promotion-card">
+                            <h6 class="mb-2">{{ promotion.name }}</h6>
+                            <p class="mb-2">{{ promotion.description }}</p>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <small class="text-muted">
+                                    Valid until {{ promotion.valid_until|date:"M d, Y" }}
+                                </small>
+                                {% if promotion.promotion_type == 'points_multiplier' %}
+                                    <span class="badge bg-primary">{{ promotion.multiplier }}x Points</span>
+                                {% elif promotion.promotion_type == 'bonus_points' %}
+                                    <span class="badge bg-success">+{{ promotion.bonus_points }} Points</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Recent Activity -->
+            <div class="card">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h5 class="card-title mb-0">Recent Activity</h5>
+                        <a href="{% url 'loyalty:points_history' %}" class="btn btn-sm btn-outline-primary">View All</a>
+                    </div>
+                    
+                    {% if recent_transactions %}
+                        {% for transaction in recent_transactions %}
+                            <div class="transaction-item transaction-{{ transaction.transaction_type }}">
+                                <div class="d-flex justify-content-between align-items-start">
+                                    <div>
+                                        <h6 class="mb-1">{{ transaction.description }}</h6>
+                                        <small class="text-muted">{{ transaction.created_at|date:"M d, Y g:i A" }}</small>
+                                        {% if transaction.reference_id %}
+                                            <small class="text-muted d-block">Ref: {{ transaction.reference_id }}</small>
+                                        {% endif %}
+                                    </div>
+                                    <div class="text-end">
+                                        <span class="fw-bold {% if transaction.points > 0 %}text-success{% else %}text-danger{% endif %}">
+                                            {% if transaction.points > 0 %}+{% endif %}{{ transaction.points|floatformat:0 }}
+                                        </span>
+                                        <small class="text-muted d-block">{{ transaction.balance_after|floatformat:0 }} total</small>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    {% else %}
+                        <p class="text-muted">No recent activity to display.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Sidebar -->
+        <div class="col-lg-4">
+            <!-- Quick Actions -->
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h5 class="card-title">Quick Actions</h5>
+                    <div class="d-grid gap-2">
+                        <a href="{% url 'loyalty:rewards_catalog' %}" class="btn btn-primary">
+                            <i class="fas fa-gift me-2"></i>Browse Rewards
+                        </a>
+                        <a href="{% url 'loyalty:tier_benefits' %}" class="btn btn-outline-primary">
+                            <i class="fas fa-crown me-2"></i>View Tier Benefits
+                        </a>
+                        <a href="{% url 'loyalty:promotions' %}" class="btn btn-outline-success">
+                            <i class="fas fa-tags me-2"></i>Active Promotions
+                        </a>
+                        <a href="{% url 'loyalty:redemption_history' %}" class="btn btn-outline-info">
+                            <i class="fas fa-history me-2"></i>Redemption History
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Redemptions -->
+            {% if recent_redemptions %}
+            <div class="card">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h5 class="card-title mb-0">Recent Redemptions</h5>
+                        <a href="{% url 'loyalty:redemption_history' %}" class="btn btn-sm btn-outline-primary">View All</a>
+                    </div>
+                    
+                    {% for redemption in recent_redemptions %}
+                        <div class="border-bottom py-2">
+                            <h6 class="mb-1">{{ redemption.reward.name }}</h6>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <small class="text-muted">{{ redemption.created_at|date:"M d, Y" }}</small>
+                                <span class="badge bg-{% if redemption.status == 'completed' %}success{% elif redemption.status == 'pending' %}warning{% else %}secondary{% endif %}">
+                                    {{ redemption.get_status_display }}
+                                </span>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Auto-refresh points balance every 30 seconds
+setInterval(function() {
+    fetch('{% url "loyalty:api_points_balance" %}')
+        .then(response => response.json())
+        .then(data => {
+            if (!data.error) {
+                // Update points display if changed
+                const currentBalance = document.querySelector('.stat-value').textContent;
+                if (parseInt(currentBalance) !== data.points_balance) {
+                    document.querySelector('.stat-value').textContent = data.points_balance.toLocaleString();
+                }
+            }
+        })
+        .catch(error => console.log('Error fetching points balance:', error));
+}, 30000);
+</script>
+{% endblock %}
